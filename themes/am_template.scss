@@ -1664,6 +1664,30 @@ section.hugetext pre {
 
 
 
-
-
-
+/* 超链接样式 */
+a {
+    display: inline-flex;        /* 使用 Flex 布局 */
+    align-items: center;         /* 垂直居中对齐 */
+    white-space: nowrap;         /* 防止换行 */
+    font-size: 0.9rem;
+    padding: 0 0.2rem;
+    color: var(--color-main);
+    font-family: var(--font-family-main);
+  }
+  
+  a:hover {
+    color: var(--color-much);
+    text-decoration: underline;  
+  }
+  
+  /* 超链接后的箭头 */
+  a::after {
+    font-size: 0.6em;
+    margin-left: 0.3em;          /* 使用 margin-left 提供间距 */
+    content: "\f148";             /* FontAwesome 箭头图标 */
+    font-family: "FontAwesome";
+    color: var(--color-much);
+    display: inline-block;        /* 确保箭头为 inline-block 元素 */
+    vertical-align: middle;       /* 垂直居中对齐 */
+  }
+  

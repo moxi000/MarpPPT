@@ -1691,3 +1691,44 @@ a {
     vertical-align: middle;       /* 垂直居中对齐 */
   }
   
+
+  /* Flexbox 布局样式 */
+section.lastpage .icons {
+    display: flex; /* 使用 Flexbox */
+    justify-content: center; /* 水平居中对齐 */
+    align-items: center; /* 垂直居中对齐 */
+    gap: 3em; /* 项目之间的间距，可根据需要调整 */
+    margin-top: 2em; /* 顶部外边距，可根据需要调整 */
+  }
+  
+  section.lastpage .icon-item {
+    display: flex; /* 每个图标-文字对使用 Flexbox */
+    align-items: center; /* 垂直居中对齐 */
+    gap: 0.5em; /* 图标与文字之间的间距 */
+  }
+  
+  section.lastpage .icon-item i {
+    /* 继承现有的图标样式 */
+    border: 2px solid;
+    padding: 10px;
+    border-radius: 50%;
+    font-size: 1.5rem; /* 调整图标大小 */
+    color: var(--color-much); /* 图标颜色，可根据主题调整 */
+    background-color: white; /* 图标背景颜色，可根据主题调整 */
+  }
+  
+  section.lastpage .icon-item span {
+    font-size: var(--font-size-main); /* 继承主字体大小 */
+    color: var(--color-main); /* 文字颜色，可根据主题调整 */
+    font-family: var(--font-family-main); /* 继承主字体 */
+  }
+  
+  /* 可选：调整整个最后一页的布局 */
+  section.lastpage {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* 占满整个幻灯片 */
+    text-align: center; /* 文字居中 */
+  }

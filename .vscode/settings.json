@@ -8,5 +8,6 @@
     "./themes/am_brown.scss",
     "./themes/am_purple.scss",
     "./themes/am_template.scss",
-  ]
+],
+"pasteImage.insertPattern": "![${imageFileName}](${imageFilePath}${imageSyntaxSuffix}"
 }

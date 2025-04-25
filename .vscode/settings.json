@@ -9,5 +9,8 @@
     "./themes/am_purple.scss",
     "./themes/am_template.scss",
 ],
-"pasteImage.insertPattern": "![${imageFileName}](${imageFilePath}${imageSyntaxSuffix}"
+"pasteImage.insertPattern": "![${imageFileName}](${imageFilePath}${imageSyntaxSuffix}",
+"markdown.marp.pptx.editable": "on",
+"markdown.marp.strictPathResolutionDuringExport": true,
+"markdown.marp.browser": "chrome"
 }

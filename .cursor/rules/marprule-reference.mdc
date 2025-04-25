@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- 当用户要求你生成 ppt时，你需要参考Marp 基本语法以及Docs文档，了解此份marp 模板中的 css 样式文件定义。根据内容，自动选择最合适的版式，例如上下双栏，左右双栏（其中包括左图右文字，左文字右图，图图上下排列，图图左右排列，以及两栏的比例等）。
+- 文件说明：
+@files/AwesomeMarp_blue.md，是模板应用示例，你可以参考学习语法。@themes/am_blue.scss，@themes/am_template.scss是具体的样式文件定义，包括每一种样式具体的实现方法。
+
+- 生成 ppt时，需要根据用户提供的内容，进行深度解读，为其设置合适的大纲，你需要考虑到，每一页的内容长度需要合理控制，逻辑清晰。

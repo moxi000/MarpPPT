@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教学幻灯片：离散坐标法 (DOM)</title>
+    <script>
+        // MathJax configuration
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+        </script>
+    <style>
+        :root {
+            --primary-bg: #f4f4f9;
+            --secondary-bg: #ffffff;
+            --text-color: #333333;
+            --header-color: #007BFF;
+            --accent-color: #ffc107;
+            --button-bg: #e9ecef;
+            --button-hover-bg: #dee2e6;
+            --border-color: #ced4da;
+            --note-text-color: #495057;
+            /* 更深的注释颜色以提高可读性 */
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+        }
+
+        #presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 56.25vw;
+            /* 16:9 Aspect Ratio */
+            max-height: 100vh;
+            max-width: 177.78vh;
+            /* 16:9 Aspect Ratio */
+            margin: auto;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--secondary-bg);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border: 1px solid #ddd;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 2.5vw;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            position: absolute;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            z-index: 1;
+        }
+
+        .slide-content {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 15px;
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 4px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background-color: #b3b3b3;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--header-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        /* 增加了字体大小 */
+        h1 {
+            font-size: 3.0vw;
+        }
+
+        h2 {
+            font-size: 2.4vw;
+        }
+
+        h3 {
+            font-size: 2.0vw;
+        }
+
+        p,
+        li {
+            font-size: 1.4vw;
+            line-height: 1.6;
+        }
+
+        /* 修复：使标题页内容垂直水平居中 */
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide h1,
+        .title-slide h2 {
+            width: auto;
+            /* 移除宽度限制以实现内容居中 */
+            border: none;
+        }
+
+        .title-slide h1 {
+            font-size: 4.5vw;
+            font-weight: 700;
+        }
+
+        .title-slide h2 {
+            font-size: 2.2vw;
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        ul {
+            text-align: left;
+            width: 95%;
+            padding-left: 20px;
+        }
+
+        strong {
+            color: var(--header-color);
+            font-weight: 600;
+        }
+
+        dl dt {
+            font-weight: bold;
+            color: var(--header-color);
+            margin-top: 1em;
+        }
+
+        dl dd {
+            margin-left: 2em;
+        }
+
+        .columns {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .column {
+            flex: 1;
+        }
+
+        figure {
+            margin: 1em 0;
+            text-align: center;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 50vh;
+            height: auto;
+            border-radius: 8px;
+            background: #fff;
+            padding: 5px;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        figcaption {
+            margin-top: 0.5em;
+            font-size: 1.0vw;
+            /* 增加字体大小 */
+            color: var(--note-text-color);
+            font-style: italic;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+            font-size: 1.0vw;
+            /* 增加字体大小 */
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: var(--button-bg);
+            color: var(--header-color);
+            font-weight: 600;
+        }
+
+        .math-display {
+            font-size: 1.6vw;
+            /* 增加字体大小 */
+            margin: 1em 0;
+        }
+
+        .note {
+            font-size: 1.1vw;
+            /* 增加字体大小 */
+            color: var(--note-text-color);
+            border-left: 3px solid var(--accent-color);
+            padding: 10px 15px;
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            border-radius: 0 5px 5px 0;
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 100;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #controls button {
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        #controls button:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        #controls button:active {
+            transform: scale(0.95);
+        }
+
+        #slide-counter {
+            font-size: 16px;
+            font-weight: 500;
+            min-width: 50px;
+            text-align: center;
+            color: #555;
+        }
+
+        @media (max-width: 800px) {
+            h1 {
+                font-size: 5.5vw;
+            }
+
+            h2 {
+                font-size: 4.5vw;
+            }
+
+            h3 {
+                font-size: 4.0vw;
+            }
+
+            p,
+            li {
+                font-size: 3.2vw;
+            }
+
+            .title-slide h1 {
+                font-size: 8vw;
+            }
+
+            .title-slide h2 {
+                font-size: 4.5vw;
+            }
+
+            figcaption {
+                font-size: 2.2vw;
+            }
+
+            table {
+                font-size: 2.2vw;
+            }
+
+            .columns {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div class="slide-content title-slide">
+                <h1>求解辐射传递方程：离散坐标法</h1>
+                <br>
+                <h2>An Introduction to the Discrete Ordinates Method (DOM)</h2>
+            </div>
+        </div>
+
+        <!-- Slide 2: What is Radiative Transfer? -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>1. 辐射传递方程 (RTE) 简介</h2>
+                <h3>什么是参与性介质 (Participating Media)？</h3>
+                <div class="columns">
+                    <div class="column">
+                        <p>在工程应用中，热辐射需要考虑与<strong>吸收、发射和散射</strong>介质的相互作用。这种介质被称为“参与性介质”。</p>
+                        <ul>
+                            <li><strong>例子:</strong> 燃料燃烧、火箭推进、高超声速激波层、核爆炸等。</li>
+                            <li>当辐射束穿过参与性介质时，会因<strong>吸收 (Absorption)</strong> 和<strong>散射 (Scattering)</strong> 而衰减。
+                            </li>
+                        </ul>
+                        <p><strong>吸收：</strong>辐射能被转化为介质的内能。</p>
+                        <p><strong>散射：</strong>辐射能被重新定向到其他方向。</p>
+                    </div>
+                    <div class="column">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d141ion7aajc73bva3hg_1.jpg?x=357&y=225&w=1124&h=560&r=0"
+                                alt="Attenuation of radiative intensity">
+                            <figcaption>FIGURE 9.1: 辐射强度因吸收和散射而衰减</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: The Radiative Transfer Equation (RTE) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>辐射传递方程 (RTE) 的构成</h2>
+                <p>RTE 是描述辐射强度场在空间中如何变化的能量平衡方程。对于稳态、平衡系统，其形式如下：</p>
+                <div class="math-display">
+                    \[ \underbrace{\frac{dI_{\eta}}{ds}}_{\text{强度变化}} =
+                    \underbrace{\kappa_{\eta}I_{b\eta}}_{\text{发射增强}} - \underbrace{\beta_{\eta}I_{\eta}}_{\text{衰减}} +
+                    \underbrace{\frac{\sigma_{s\eta}}{4\pi} \int_{4\pi} I_{\eta}(\widehat{\mathbf{s}}_i)
+                    \Phi_{\eta}(\widehat{\mathbf{s}}_i, \widehat{\mathbf{s}}) d\Omega_i}_{\text{内散射增强}} \]
+                </div>
+                <ul>
+                    <li>$I_{\eta}$ : 光谱辐射强度 (spectral radiative intensity)</li>
+                    <li>$\kappa_{\eta}$ : 吸收系数 (absorption coefficient)</li>
+                    <li>$\sigma_{s\eta}$ : 散射系数 (scattering coefficient)</li>
+                    <li>$\beta_{\eta} = \kappa_{\eta} + \sigma_{s\eta}$ : 衰减系数 (extinction coefficient)</li>
+                    <li>$I_{b\eta}$ : 普朗克黑体辐射函数 (Planck's function)</li>
+                    <li>$\Phi_{\eta}$ : 散射相函数 (scattering phase function)，描述能量如何被重新分配到不同方向</li>
+                </ul>
+                <p class="note">这是一个复杂的<strong>积分-微分方程</strong>，难以解析求解，因此需要数值方法。</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: RTE in Optical Coordinates -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>RTE 的简化形式：光学坐标</h2>
+                <p>为了简化方程，我们引入两个无量纲参数：</p>
+                <div class="columns">
+                    <div class="column">
+                        <p><strong>1. 光学厚度 (Optical Thickness):</strong></p>
+                        \[ \tau_{\eta} = \int_0^s \beta_{\eta} ds \]
+                        <p>它代表了辐射束穿过的“光学距离”。</p>
+                    </div>
+                    <div class="column">
+                        <p><strong>2. 单次散射反照率 (Single Scattering Albedo):</strong></p>
+                        \[ \omega_{\eta} = \frac{\sigma_{s\eta}}{\beta_{\eta}} = \frac{\sigma_{s\eta}}{\kappa_{\eta} +
+                        \sigma_{s\eta}} \]
+                        <p>它代表了散射在总衰减中的占比 ($0 \le \omega_{\eta} \le 1$)</p>
+                    </div>
+                </div>
+                <p>利用这些参数，RTE可以写成一个看似简单的一阶常微分方程形式：</p>
+                <div class="math-display">
+                    \[ \frac{dI_{\eta}}{d\tau_{\eta}} + I_{\eta} = S_{\eta}(\tau_{\eta}, \widehat{\mathbf{s}}) \]
+                </div>
+                <p>其中 $S_{\eta}$ 是<strong>辐射源函数 (Source Function)</strong>:</p>
+                \[ S_{\eta} = (1 - \omega_{\eta})I_{b\eta} + \frac{\omega_{\eta}}{4\pi} \int_{4\pi}
+                I_{\eta}(\widehat{\mathbf{s}}_i) \Phi_{\eta}(\widehat{\mathbf{s}}_i, \widehat{\mathbf{s}}) d\Omega_i \]
+                <p class="note">尽管形式简单，但源函数中的积分项使问题依然复杂，因为它依赖于所有方向的未知强度 $I_{\eta}$。</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: Boundary Conditions -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>RTE 的边界条件</h2>
+                <p>求解RTE需要知道在边界处射出（emanation）的辐射强度。对于一个不透明、漫反射和漫发射的表面，其射出强度由自身发射和对入射辐射的反射共同决定。</p>
+                <div class="columns">
+                    <div class="column">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d141ion7aajc73bva3hg_9.jpg?x=543&y=218&w=748&h=522&r=0"
+                                alt="Radiative intensity reflected from a surface.">
+                            <figcaption>FIGURE 9.7: 从表面反射的辐射强度</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <p>边界条件方程为：</p>
+                        <div class="math-display">
+                            \[ I(\mathbf{r}_w, \widehat{\mathbf{s}}) = \underbrace{\epsilon
+                            I_b(\mathbf{r}_w)}_{\text{发射部分}} + \underbrace{\frac{\rho}{\pi} \int_{\widehat{\mathbf{n}}
+                            \cdot \widehat{\mathbf{s}}' < 0} I(\mathbf{r}_w, \widehat{\mathbf{s}}')
+                                |\widehat{\mathbf{n}} \cdot \widehat{\mathbf{s}}'| d\Omega'}_{\text{反射部分}} \] </div>
+                                <ul>
+                                    <li>$\epsilon$ 是表面发射率，$\rho$ 是反射率。</li>
+                                    <li>$I(\mathbf{r}_w, \widehat{\mathbf{s}}')$ 是来自介质内部，所有方向的入射强度。</li>
+                                    <li>对于黑体墙 ($\rho=0$), 边界条件简化为 $I(\mathbf{r}_w, \widehat{\mathbf{s}}) =
+                                        I_b(\mathbf{r}_w)$。</li>
+                                </ul>
+                        </div>
+                    </div>
+                    <p class="note">边界条件的积分形式同样给求解带来了挑战。现在，我们来看看如何用离散坐标法解决这些难题。</p>
+                </div>
+            </div>
+
+            <!-- Slide 6: Intro to DOM -->
+            <div class="slide">
+                <div class="slide-content">
+                    <h2>2. 离散坐标法 (The Discrete Ordinates Method, DOM)</h2>
+                    <h3>核心思想</h3>
+                    <p>离散坐标法（或称 $S_N$ 近似）是一种将复杂的积分-微分辐射传递方程转换为一组可解的<strong>耦合偏微分方程</strong>的数值方法。</p>
+                    <p>其核心思想是：</p>
+                    <ul>
+                        <li><strong>角度离散化</strong>：不再求解所有连续方向 ($\Omega$) 上的辐射强度
+                            $I(\widehat{\mathbf{s}})$，而是只求解一组预先选定的、有限的<strong>离散方向</strong> $\widehat{\mathbf{s}}_i$
+                            ($i=1, 2, ..., n$) 上的强度 $I_i$。</li>
+                        <li><strong>积分近似</strong>：将RTE和边界条件中的方向积分项，用基于这些离散方向的<strong>数值求积（quadrature）</strong>来近似。</li>
+                    </ul>
+                    <div class="math-display">
+                        \[ \int_{4\pi} f(\widehat{\mathbf{s}}) d\Omega \approx \sum_{i=1}^{n} w_i
+                        f(\widehat{\mathbf{s}}_i) \]
+                    </div>
+                    <p>其中，$w_i$ 是与方向 $\widehat{\mathbf{s}}_i$ 相关联的<strong>求积权重</strong>。</p>
+                    <p class="note">本质上，DOM 是对RTE方向依赖性的一种<strong>有限差分</strong>处理。</p>
+                </div>
+            </div>
+
+            <!-- Slide 7: The DOM Equations -->
+            <div class="slide">
+                <div class="slide-content">
+                    <h2>DOM 控制方程</h2>
+                    <p>将数值求积应用于RTE，我们得到一组 $n$ 个耦合的偏微分方程：</p>
+                    <div class="math-display">
+                        \[ \widehat{\mathbf{s}}_i \cdot \nabla I_i = \kappa I_b - \beta I_i + \frac{\sigma_s}{4\pi}
+                        \sum_{j=1}^{n} w_j I_j \Phi(\widehat{\mathbf{s}}_j, \widehat{\mathbf{s}}_i) \quad, \quad i=1, 2,
+                        \dots, n \]
+                    </div>
+                    <p>对比原始RTE：</p>
+                    \[ \widehat{\mathbf{s}} \cdot \nabla I = \kappa I_b - \beta I + \frac{\sigma_s}{4\pi} \int_{4\pi}
+                    I(\widehat{\mathbf{s}}') \Phi(\widehat{\mathbf{s}}', \widehat{\mathbf{s}}) d\Omega' \]
+                    <p><strong>关键变化：</strong></p>
+                    <ul>
+                        <li>原方程中的<strong>积分项 $\int_{4\pi} \dots d\Omega'$ 被求和项 $\sum_{j=1}^{n} \dots$ 替代</strong>。</li>
+                        <li>$I_i \equiv I(\mathbf{r}, \widehat{\mathbf{s}}_i)$ 是在第 $i$ 个离散方向上的未知辐射强度。</li>
+                        <li>这组方程是线性的，但由于散射项（求和项）和反射边界条件的存在，它们是<strong>相互耦合</strong>的，通常需要迭代求解。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 8: Discretized Boundary Conditions -->
+            <div class="slide">
+                <div class="slide-content">
+                    <h2>DOM 边界条件</h2>
+                    <p>同样地，漫反射边界条件中的积分也被求和所取代。对于离开墙面的每个方向 $\widehat{\mathbf{s}}_i$（即 $\widehat{\mathbf{n}} \cdot
+                        \widehat{\mathbf{s}}_i > 0$），边界条件为：</p>
+                    <div class="math-display">
+                        \[ I_i = \epsilon I_{bw} + \frac{\rho}{\pi} \sum_{\widehat{\mathbf{n}} \cdot
+                        \widehat{\mathbf{s}}_j < 0} w_j I_j |\widehat{\mathbf{n}} \cdot \widehat{\mathbf{s}}_j| \]
+                            </div>
+                            <p><strong>解释:</strong></p>
+                            <ul>
+                                <li>$I_i$ 是离开墙面的强度。</li>
+                                <li>$I_j$ 是所有入射方向（$\widehat{\mathbf{n}} \cdot \widehat{\mathbf{s}}_j < 0$）上的强度。</li>
+                                <li>这表明离开墙面的强度 $I_i$ 依赖于所有射向墙面的强度 $I_j$。</li>
+                                <li>如果墙面是黑体（$\rho=0$），则 $I_i = I_{bw}$，求解大大简化。</li>
+                                <li>如果墙面有反射（$\rho>0$），边界条件也引入了方向间的耦合，需要迭代求解。</li>
+                            </ul>
+                    </div>
+                </div>
+
+                <!-- Slide 9: Calculating Physical Quantities -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>计算物理量</h2>
+                        <p>一旦通过求解方程组获得了所有离散方向的强度 $I_i$，我们就可以计算出宏观的辐射量，例如辐射热流和入射辐射。</p>
+                        <p><strong>辐射热流矢量 (Radiative Heat Flux Vector) $\mathbf{q}$:</strong></p>
+                        <div class="math-display">
+                            \[ \mathbf{q}(\mathbf{r}) = \int_{4\pi} I(\mathbf{r}, \widehat{\mathbf{s}})
+                            \widehat{\mathbf{s}} d\Omega \approx \sum_{i=1}^{n} w_i I_i(\mathbf{r})
+                            \widehat{\mathbf{s}}_i \]
+                        </div>
+                        <p><strong>入射辐射 (Incident Radiation) $G$:</strong></p>
+                        <div class="math-display">
+                            \[ G(\mathbf{r}) = \int_{4\pi} I(\mathbf{r}, \widehat{\mathbf{s}}) d\Omega \approx
+                            \sum_{i=1}^{n} w_i I_i(\mathbf{r}) \]
+                        </div>
+                        <p>入射辐射 $G$ 很重要，因为它直接关系到辐射源项 $\nabla \cdot \mathbf{q}_R$：</p>
+                        \[ \nabla \cdot \mathbf{q}_R = \kappa (4\pi I_b - G) \]
+                        <p class="note">这个源项是求解总能量方程（包括传导和对流）所必需的。</p>
+                    </div>
+                </div>
+
+                <!-- Slide 10: Quadrature Sets: S_N Approximation -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>方向选择：$S_N$ 求积组</h2>
+                        <p>离散方向 $\widehat{\mathbf{s}}_i$ 和权重 $w_i$ 的选择至关重要，它直接影响计算的精度和效率。这些方向和权重的组合被称为<strong>求积组
+                                (Quadrature Set)</strong>。</p>
+                        <ul>
+                            <li>常用的求积组是 $S_N$ 近似，其中 $N$ 是每个坐标方向上方向余弦值的数量。</li>
+                            <li>$S_N$ 近似总共有 $n=N(N+2)$ 个离散方向。</li>
+                            <li>好的求积组应满足对称性和各阶矩守恒，以保证能量守恒和通量计算的准确性。</li>
+                        </ul>
+                        <p><strong>$S_N$ 求积组示例 (仅展示第一卦限):</strong></p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>$S_N$ 近似</th>
+                                    <th>$\xi_i$ (x-dir cosine)</th>
+                                    <th>$\eta_i$ (y-dir cosine)</th>
+                                    <th>$\mu_i$ (z-dir cosine)</th>
+                                    <th>$w_i$ (Weight)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>$S_2$</td>
+                                    <td>0.577350</td>
+                                    <td>0.577350</td>
+                                    <td>0.577350</td>
+                                    <td>1.570796</td>
+                                </tr>
+                                <tr>
+                                    <td rowspan="3">$S_4$</td>
+                                    <td>0.295876</td>
+                                    <td>0.295876</td>
+                                    <td>0.908248</td>
+                                    <td>0.523599</td>
+                                </tr>
+                                <tr>
+                                    <td>0.295876</td>
+                                    <td>0.908248</td>
+                                    <td>0.295876</td>
+                                    <td>0.523599</td>
+                                </tr>
+                                <tr>
+                                    <td>0.908248</td>
+                                    <td>0.295876</td>
+                                    <td>0.295876</td>
+                                    <td>0.523599</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="note">TABLE 16.1 (部分): $S_2$ ($n=8$) 和 $S_4$ ($n=24$) 近似的离散方向和权重。</p>
+                    </div>
+                </div>
+
+                <!-- Slide 11: Application: 1D Slab -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>应用：一维平板问题</h2>
+                        <p>对于一个夹在两块无限大平行板之间的一维介质，强度只随 $z$ (或光学厚度 $\tau$) 变化。DOM方程得到极大简化。</p>
+                        <p>强度被分为两个方向组：</p>
+                        <ul>
+                            <li><strong>$I_i^+$</strong>: 向上（$+\mu_i$）传播的强度</li>
+                            <li><strong>$I_i^-$</strong>: 向下（$-\mu_i$）传播的强度</li>
+                        </ul>
+                        <p>控制方程变为两组常微分方程 ($i=1, \dots, N/2$):</p>
+                        <div class="columns">
+                            <div class="column">
+                                <p><strong>向上强度:</strong></p>
+                                \[ \mu_i \frac{dI_i^+}{d\tau} + I_i^+ = S_i^+(\tau) \]
+                                <p><strong>边界条件:</strong> $I_i^+(0) = J_1/\pi$ (在底部墙面)</p>
+                            </div>
+                            <div class="column">
+                                <p><strong>向下强度:</strong></p>
+                                \[ -\mu_i \frac{dI_i^-}{d\tau} + I_i^- = S_i^-(\tau) \]
+                                <p><strong>边界条件:</strong> $I_i^-(\tau_L) = J_2/\pi$ (在顶部墙面)</p>
+                            </div>
+                        </div>
+                        <p>$S_i$ 是源函数，包含介质发射和散射。这是一个相对简单的常微分方程组，可以高效求解。</p>
+                    </div>
+                </div>
+
+                <!-- Slide 12: Example 16.1 Walkthrough -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>一维平板示例 (Example 16.1)</h2>
+                        <p><strong>问题描述：</strong> 求解处于辐射平衡状态的灰色、各向同性散射介质在两块漫反射灰体板之间的热流。</p>
+                        <p>使用最低阶的 <strong>$S_2$ 近似</strong>（仅有1个向上的方向和1个向下的方向）。</p>
+                        <p><strong>结果 (无量纲热流 $\Psi = q / (J_1 - J_2)$):</strong></p>
+                        <div class="columns">
+                            <div class="column">
+                                <p><strong>1. 对称 $S_2$ 近似 ($\mu_1=1/\sqrt{3}$):</strong></p>
+                                <div class="math-display">\[ \Psi_{\text{symmetric}} = \frac{1}{\sqrt{3}/2 + 3\tau_L/4}
+                                    \]</div>
+                            </div>
+                            <div class="column">
+                                <p><strong>2. 非对称 $S_2$ 近似 ($\mu_1=0.5$):</strong></p>
+                                <div class="math-display">\[ \Psi_{\text{nonsymmetric}} = \frac{1}{1 + \tau_L} \]</div>
+                            </div>
+                        </div>
+                        <p>非对称 $S_2$ 近似也被称为 <strong>Schuster-Schwarzschild (二通量) 近似</strong>，是一种经典的简化模型。</p>
+                        <p class="note">为什么会有两种 $S_2$ 近似？这关系到求积组是否能精确满足某些物理守恒定律，我们将在下一页看到它们的差异。</p>
+                    </div>
+                </div>
+
+                <!-- Slide 13: Example 16.1 Results & Analysis -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>示例结果分析</h2>
+                        <p>将 $S_2$ 近似结果与精确解进行比较：</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>$\tau_L$ (光学厚度)</th>
+                                    <th>精确解</th>
+                                    <th>$S_2$ (对称)</th>
+                                    <th>$S_2$ (非对称)</th>
+                                    <th>$P_1$ 近似</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>0.0 (光学薄)</td>
+                                    <td>1.0000</td>
+                                    <td style="background-color: #ffebee;">1.1547</td>
+                                    <td style="background-color: #e8f5e9;">1.0000</td>
+                                    <td style="background-color: #e8f5e9;">1.0000</td>
+                                </tr>
+                                <tr>
+                                    <td>0.1</td>
+                                    <td>0.9157</td>
+                                    <td>1.0627</td>
+                                    <td>0.9091</td>
+                                    <td>0.9302</td>
+                                </tr>
+                                <tr>
+                                    <td>1.0</td>
+                                    <td>0.5532</td>
+                                    <td>0.6188</td>
+                                    <td>0.5000</td>
+                                    <td>0.5714</td>
+                                </tr>
+                                <tr>
+                                    <td>5.0 (光学厚)</td>
+                                    <td>0.2077</td>
+                                    <td>0.2166</td>
+                                    <td>0.1667</td>
+                                    <td>0.2105</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="note">TABLE 16.3: 不同方法计算的辐射热流比较</p>
+                        <p><strong>结论:</strong></p>
+                        <ul>
+                            <li>对于<strong>光学薄</strong>介质 ($\tau_L \to 0$)，对称 $S_2$ 近似有显著误差，而非对称 $S_2$ 近似是精确的。</li>
+                            <li>这是因为非对称 $S_2$ 求积组能更好地满足半空间矩积分（half-range moment），这对于墙面热流计算至关重要。</li>
+                            <li>这强调了<strong>选择合适的求积组</strong>对DOM精度的重要性。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Slide 14: Multidimensional Problems -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>多维问题 (2D/3D)</h2>
+                        <p>DOM 可以直接推广到多维问题。以三维笛卡尔坐标系为例，DOM方程组的形式为：</p>
+                        <div class="math-display">
+                            \[ \xi_i \frac{\partial I_i}{\partial x} + \eta_i \frac{\partial I_i}{\partial y} + \mu_i
+                            \frac{\partial I_i}{\partial z} + \beta I_i = \beta S_i \quad , \quad i=1, \dots, n \]
+                        </div>
+                        <ul>
+                            <li>($\xi_i, \eta_i, \mu_i$) 是方向 $\widehat{\mathbf{s}}_i$ 的方向余弦。</li>
+                            <li>现在，每个方程都是一个<strong>一阶偏微分方程</strong>。</li>
+                            <li>这个方程组必须在空间域上进行数值求解，最常用的方法是<strong>有限体积法 (Finite Volume Method, FVM)</strong>。</li>
+                        </ul>
+                        <p class="note">将DOM与FVM结合是现代计算流体力学 (CFD) 软件中处理辐射的标准做法。</p>
+                    </div>
+                </div>
+
+                <!-- Slide 15: Spatial Discretization (FVM) -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>空间离散化：有限体积法</h2>
+                        <p>有限体积法将计算域划分为许多小的<strong>控制体积（单元）</strong>。DOM方程在每个控制体积上进行积分。</p>
+                        <div class="columns">
+                            <div class="column">
+                                <p>对方程 $\nabla \cdot (I_i \widehat{\mathbf{s}}_i) = -\beta I_i + \beta S_i$ 在体积 $V_P$
+                                    上积分，并使用高斯散度定理，得到：</p>
+                                <div class="math-display">
+                                    \[ \sum_{f} I_{i,f} (\widehat{\mathbf{s}}_i \cdot \widehat{\mathbf{n}}_f) A_f =
+                                    (-\beta_P I_{i,P} + \beta_P S_{i,P}) V_P \]
+                                </div>
+                                <ul>
+                                    <li>$I_{i,P}$ 是单元 $P$ 中心的强度。</li>
+                                    <li>$I_{i,f}$ 是单元 $P$ 的面 $f$ 上的强度。</li>
+                                    <li>$\widehat{\mathbf{n}}_f$ 是面 $f$ 的外法线向量。</li>
+                                </ul>
+                                <p>下一步的关键是如何用<strong>单元中心的值 ($I_{i,P}$ 和其邻居)</strong> 来表示<strong>面上的值
+                                        ($I_{i,f}$)</strong>。</p>
+                            </div>
+                            <div class="column">
+                                <figure>
+                                    <img src="https://cdn.noedgeai.com/bo_d141kgv7aajc73bva480_14.jpg?x=602&y=226&w=630&h=519&r=0"
+                                        alt="A generic control volume">
+                                    <figcaption>FIGURE 16.2: 一个通用的控制体积 (单元)</figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 16: Spatial Discretization Schemes -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>空间离散格式</h2>
+                        <p>用单元中心强度表示面强度的不同方法，称为<strong>空间离散格式</strong>。常用的有：</p>
+                        <div class="columns">
+                            <div class="column">
+                                <p><strong>1. 步进格式 (Step Scheme)</strong></p>
+                                <ul>
+                                    <li>也称一阶迎风格式。</li>
+                                    <li>思想：面上的值等于<strong>上游</strong>单元中心的值。</li>
+                                    <li>优点：简单、稳定，保证结果物理有界（不会产生负强度）。</li>
+                                    <li>缺点：精度只有一阶，会引入较大的数值误差，称为<strong>伪散射 (False Scattering)</strong>。</li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <p><strong>2. 菱形格式 (Diamond Scheme)</strong></p>
+                                <ul>
+                                    <li>一种二阶精度的中心差分格式。</li>
+                                    <li>思想：$I_{face} \approx 2 I_{center} - I_{opposite\_face}$</li>
+                                    <li>优点：精度更高，能显著减少伪散射。</li>
+                                    <li>缺点：可能产生非物理的负强度或过冲，数值上不稳定。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d141kgv7aajc73bva480_20.jpg?x=582&y=226&w=667&h=601&r=0"
+                                alt="2D orthogonal structured grid">
+                            <figcaption>FIGURE 16.5: 二维正交结构化网格示意图</figcaption>
+                        </figure>
+                    </div>
+                </div>
+
+                <!-- Slide 17: Issue 1: False Scattering -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>DOM 的缺陷 1：伪散射 (False Scattering)</h2>
+                        <p><strong>伪散射</strong>是由于<strong>空间离散</strong>引起的数值误差。当辐射方向与网格线不一致时，即使在没有物理散射的介质中，辐射束也会在计算中被不真实地“涂抹”开来。
+                        </p>
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d141kgv7aajc73bva480_24.jpg?x=196&y=222&w=1444&h=481&r=0"
+                                alt="Illustration of False Scattering">
+                            <figcaption>FIGURE 16.6: (a) 精确解, (b) 步进格式结果, (c) 菱形格式结果</figcaption>
+                        </figure>
+                        <ul>
+                            <li>上图显示了一束准直光束穿过透明介质。</li>
+                            <li>(b) <strong>步进格式</strong>（一阶）产生了严重的伪散射，能量扩散到光束路径之外。</li>
+                            <li>(c) <strong>菱形格式</strong>（二阶）显著减轻了伪散射。</li>
+                            <li><strong>解决方法：</strong>使用更精细的网格或更高阶的空间离散格式。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Slide 18: Issue 2: Ray Effect -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>DOM 的缺陷 2：射线效应 (Ray Effect)</h2>
+                        <p><strong>射线效应</strong>是由于<strong>角度离散</strong>引起的。当辐射源（如高温小区域）尺寸较小时，辐射能只会沿着预设的离散方向传播，导致方向之间出现“盲区”，产生非物理的温度或热流分布。
+                        </p>
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d141kgv7aajc73bva480_38.jpg?x=354&y=225&w=1131&h=563&r=0"
+                                alt="Illustration of Ray Effect">
+                            <figcaption>FIGURE 16.11: 方腔内温度分布，深色为高温区。(a) DOM ($S_8$) (b) FAM</figcaption>
+                        </figure>
+                        <ul>
+                            <li>上图(a)显示了明显的射线效应：能量呈“星芒状”从热源沿离散方向射出。</li>
+                            <li>这是DOM最严重的缺陷之一。</li>
+                            <li><strong>解决方法：</strong>增加离散方向的数量（如从$S_4$提高到$S_8, S_{16}$），但这会急剧增加计算成本。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Slide 19: The Finite Angle Method (FAM) -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>改进方法：有限角法 (Finite Angle Method, FAM)</h2>
+                        <p>有限角法 (在一些文献中也称作辐射的有限体积法) 是对标准DOM的重大改进，旨在减轻射线效应并保证能量守恒。</p>
+                        <div class="columns">
+                            <div class="column">
+                                <p><strong>核心思想：</strong></p>
+                                <ul>
+                                    <li>不同于DOM使用<strong>离散的线状射线</strong>，FAM在<strong>有限大小的立体角 (Control Angle)
+                                            $\Omega_i$</strong> 上对RTE进行积分。</li>
+                                    <li>这相当于追踪一束<strong>锥形的射线束</strong>，而不是一条无限细的射线。</li>
+                                    <li>通过对角度的积分，能量被平均化，从而“平滑”了射线效应。</li>
+                                    <li>FAM在角度空间上是完全守恒的。</li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <figure>
+                                    <img src="https://cdn.noedgeai.com/bo_d141kgv7aajc73bva480_31.jpg?x=586&y=229&w=661&h=565&r=0"
+                                        alt="Finite control angles">
+                                    <figcaption>FIGURE 16.9: FAM中使用的有限控制角示意图</figcaption>
+                                </figure>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 20: DOM vs. FAM Comparison -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>DOM vs. FAM 效果对比</h2>
+                        <p>在一个具有挑战性的基准问题（底部中心有小热源的方腔）中，FAM在抑制射线效应方面的优势非常明显。</p>
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d141kgv7aajc73bva480_39.jpg?x=320&y=225&w=1193&h=607&r=0"
+                                alt="Comparison of wall heat fluxes">
+                            <figcaption>FIGURE 16.12: 顶壁(a)和侧壁(b)的热流分布对比</figcaption>
+                        </figure>
+                        <ul>
+                            <li><strong>DOM ($S_8$)</strong> 的结果（蓝色曲线）在壁面上显示出剧烈的、非物理的振荡，这是典型的射线效应。</li>
+                            <li><strong>FAM</strong> 的结果（绿色曲线）则平滑得多，与更精确的蒙特卡罗方法（方块点）吻合得更好。</li>
+                        </ul>
+                        <p class="note">因此，对于需要高精度结果或存在小尺寸强辐射源的问题，FAM是比标准DOM更优越的选择。</p>
+                    </div>
+                </div>
+
+                <!-- Slide 21: Other Related Methods -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>其他相关方法简介</h2>
+                        <p style="font-size: 1.6vw;">除了标准DOM和FAM，辐射传递方程还有许多其他的数值求解方法和变体，各有其适用场景和优势。</p>
+                        
+                        <div class="columns">
+                            <div class="column">
+                                <h3 style="font-size: 1.8vw; color: var(--header-color);">修正离散坐标法 (Modified DOM)</h3>
+                                <p style="font-size: 1.5vw; line-height: 1.5;">
+                                    <strong>核心思想：</strong>将辐射强度分解为墙面贡献和介质贡献两部分：
+                                </p>
+                                <div class="math-display" style="font-size: 1.4vw;">
+                                    \[ I = I_w + I_m \]
+                                </div>
+                                <ul style="font-size: 1.4vw;">
+                                    <li>$I_w$：用视图因子或光线追踪精确求解</li>
+                                    <li>$I_m$：用标准DOM求解</li>
+                                    <li><strong>优势：</strong>有效消除墙面辐射主导问题的射线效应</li>
+                                </ul>
+                                
+                                <h3 style="font-size: 1.8vw; color: var(--header-color); margin-top: 1.5em;">P_N 近似法</h3>
+                                <p style="font-size: 1.4vw;">
+                                    将角度依赖性用球谐函数展开，只保留前N+1项。P_1近似（扩散近似）是最常用的简化方法。
+                                </p>
+                            </div>
+                            
+                            <div class="column">
+                                <h3 style="font-size: 1.8vw; color: var(--header-color);">偶宇称公式 (Even-Parity)</h3>
+                                <p style="font-size: 1.4vw;">
+                                    将一阶RTE变换为二阶的类扩散方程，数学上更稳定，可避免负强度问题。
+                                </p>
+                                
+                                <h3 style="font-size: 1.8vw; color: var(--header-color); margin-top: 1.5em;">蒙特卡罗法 (Monte Carlo)</h3>
+                                <ul style="font-size: 1.4vw;">
+                                    <li><strong>优势：</strong>可处理任意复杂几何和物性</li>
+                                    <li><strong>缺点：</strong>计算成本极高，收敛慢</li>
+                                    <li><strong>应用：</strong>常作为其他方法的基准解</li>
+                                </ul>
+                                
+                                <h3 style="font-size: 1.8vw; color: var(--header-color); margin-top: 1.5em;">离散传递法 (DTM)</h3>
+                                <p style="font-size: 1.4vw;">
+                                    结合DOM和射线追踪思想，追踪从墙面发出的离散射线束，适用于墙面辐射主导的问题。
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="note" style="font-size: 1.3vw; margin-top: 2em;">
+                            <strong>方法选择建议：</strong>
+                            • 光学薄介质：DOM/FAM 或 蒙特卡罗
+                            • 光学厚介质：P_1近似 或 扩散近似  
+                            • 复杂几何：蒙特卡罗 或 射线追踪
+                            • 工程应用：DOM + CFD耦合
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 22: Conclusion -->
+                <div class="slide">
+                    <div class="slide-content">
+                        <h2>总结与结论</h2>
+                        <p><strong>离散坐标法 (DOM) 及其变体 (FAM)</strong> 是求解辐射传递方程功能最强大、应用最广泛的数值方法之一。</p>
+                        <div class="columns">
+                            <div class="column">
+                                <h3>优点 (Pros)</h3>
+                                <ul>
+                                    <li><strong>通用性强</strong>：适用于任意几何形状、变物性、各向异性散射等复杂问题。</li>
+                                    <li><strong>精度可控</strong>：通过增加空间网格和角度离散的数量，可以系统地提高计算精度。</li>
+                                    <li><strong>计算效率</strong>：对于大多数工程问题，比蒙特卡罗方法计算速度快。</li>
+                                    <li><strong>易于集成</strong>：可方便地与CFD软件中的传导和对流求解器耦合。</li>
+                                </ul>
+                            </div>
+                            <div class="column">
+                                <h3>缺点 (Cons)</h3>
+                                <ul>
+                                    <li><strong>射线效应</strong>：角度离散的固有缺陷，尤其在低阶近似时。</li>
+                                    <li><strong>伪散射</strong>：空间离散的固有缺陷，尤其在低阶格式和粗网格时。</li>
+                                    <li><strong>计算成本</strong>：高阶近似 ($S_N$中$N$很大) 或精细网格会显著增加计算量和内存需求。</li>
+                                    <li><strong>收敛性问题</strong>：在光学厚或强散射介质中，迭代收敛可能非常缓慢。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="note">在选择RTE求解方法时，需要根据具体问题的物理特性（光学厚度、散射特性、几何形状）和精度要求，在DOM/FAM、P_N近似和蒙特卡罗等方法之间进行权衡。</p>
+                    </div>
+                </div>
+
+                <!-- Slide 23: Q&A -->
+                <div class="slide">
+                    <div class="slide-content title-slide">
+                        <h1>感谢观看</h1>
+                        <br>
+                        <h2>问答环节 (Q&A)</h2>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="controls">
+                <button id="prev-btn" title="上一页 (←)">←</button>
+                <span id="slide-counter">1 / 23</span>
+                <button id="next-btn" title="下一页 (→)">→</button>
+                <button id="fullscreen-btn" title="全屏">⛶</button>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const slides = document.querySelectorAll('.slide');
+                    const prevBtn = document.getElementById('prev-btn');
+                    const nextBtn = document.getElementById('next-btn');
+                    const fullscreenBtn = document.getElementById('fullscreen-btn');
+                    const slideCounter = document.getElementById('slide-counter');
+                    const presentationContainer = document.getElementById('presentation-container');
+
+                    let currentSlide = 0;
+                    const totalSlides = slides.length;
+
+                    function updateSlideCounter() {
+                        slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                    }
+
+                    function showSlide(index) {
+                        slides.forEach((slide, i) => {
+                            slide.classList.remove('active');
+                        });
+                        slides[index].classList.add('active');
+                        currentSlide = index;
+                        updateSlideCounter();
+
+                        if (window.MathJax && window.MathJax.typeset) {
+                            MathJax.typesetPromise([slides[index]]).catch(function (err) {
+                                console.log('MathJax typesetting error: ' + err.message);
+                            });
+                        }
+                    }
+
+                    function nextSlide() {
+                        let next = currentSlide + 1;
+                        if (next < totalSlides) {
+                            showSlide(next);
+                        }
+                    }
+
+                    function prevSlide() {
+                        let prev = currentSlide - 1;
+                        if (prev >= 0) {
+                            showSlide(prev);
+                        }
+                    }
+
+                    function toggleFullScreen() {
+                        if (!document.fullscreenElement) {
+                            presentationContainer.requestFullscreen().catch(err => {
+                                alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                            });
+                        } else {
+                            document.exitFullscreen();
+                        }
+                    }
+
+                    // Event Listeners
+                    nextBtn.addEventListener('click', nextSlide);
+                    prevBtn.addEventListener('click', prevSlide);
+                    fullscreenBtn.addEventListener('click', toggleFullScreen);
+
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === ' ') {
+                            let target = e.target;
+                            let isInsideScrollable = false;
+                            while (target != document.body) {
+                                if (target.scrollHeight > target.clientHeight && target.classList.contains('slide-content')) {
+                                    isInsideScrollable = true;
+                                    break;
+                                }
+                                target = target.parentElement;
+                            }
+                            if (!isInsideScrollable) {
+                                e.preventDefault();
+                            }
+                        }
+
+                        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+                            if (!e.target.closest('.slide-content')) {
+                                e.preventDefault();
+                                nextSlide();
+                            }
+                        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                            if (!e.target.closest('.slide-content')) {
+                                e.preventDefault();
+                                prevSlide();
+                            }
+                        } else if (e.key === 'f' || e.key === 'F') {
+                            e.preventDefault();
+                            toggleFullScreen();
+                        }
+                    });
+
+                    window.addEventListener('wheel', e => {
+                        let target = e.target;
+                        let canScroll = false;
+                        while (target && target != document.body) {
+                            if (target.classList.contains('slide-content') && target.scrollHeight > target.clientHeight) {
+                                canScroll = true;
+                                break;
+                            }
+                            target = target.parentElement;
+                        }
+                        if (!canScroll) {
+                            e.preventDefault();
+                        }
+                    }, { passive: false });
+
+                    // Initial setup
+                    showSlide(0);
+                });
+            </script>
+
+</body>
+
+</html>

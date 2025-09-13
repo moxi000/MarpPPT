@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组会汇报 - FOS框架学习与工作进展</title>
+    
+    <!-- MathJax 配置 - 支持数学公式 -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+    
+    <style>
+        /* ==================== 主题变量 ==================== */
+        :root {
+            /* 默认主题 - 专业蓝 */
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --text-color: #2c3e50;
+            --header-color: #2563eb;
+            --accent-color: #3b82f6;
+            --button-bg: #e5e7eb;
+            --button-hover-bg: #d1d5db;
+            --border-color: #d1d5db;
+            --note-bg: #eff6ff;
+            --note-border: #3b82f6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --code-bg: #f3f4f6;
+            --code-color: #1f2937;
+            /* [新增] 字体缩放变量 */
+            --font-scale: 1.0; 
+        }
+
+        /* 深色主题 */
+        [data-theme="dark"] {
+            --primary-bg: #1a1a1a;
+            --secondary-bg: #262626;
+            --text-color: #e5e5e5;
+            --header-color: #60a5fa;
+            --accent-color: #3b82f6;
+            --button-bg: #404040;
+            --button-hover-bg: #525252;
+            --border-color: #404040;
+            --note-bg: #1e3a5f;
+            --note-border: #60a5fa;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --code-bg: #374151;
+            --code-color: #f3f4f6;
+        }
+        /* 绿色主题（优化：更清新、苹果风） */
+        [data-theme="green"] {
+            --primary-bg: #f6fbf7;    /* 柔和浅绿底 */
+            --secondary-bg: #ffffff;
+            --text-color: #0f2e1d;    /* 深绿偏中性文字 */
+            --header-color: #2ec866;  /* 系统绿风格 */
+            --accent-color: #34c759;  /* Apple systemGreen */
+            --button-bg: #e8f5ea;     /* 轻浅按钮背景 */
+            --button-hover-bg: #dff1e3;
+            --border-color: #d6eadb;  /* 柔和边框 */
+            --note-bg: #edf9f0;       /* 浅提示底 */
+            --note-border: #34c759;
+            --code-bg: #f1f6f2;
+            --code-color: #0f2e1d;
+        }
+
+        /* 薄荷主题（新增）：清新薄荷青，Apple systemMint 风格） */
+        [data-theme="mint"] {
+            --primary-bg: #f5fbfa;
+            --secondary-bg: #ffffff;
+            --text-color: #0f2f2e;
+            --header-color: #00c7be;  /* systemMint */
+            --accent-color: #20dad0;
+            --button-bg: #e6f7f5;
+            --button-hover-bg: #d7f2ef;
+            --border-color: #cde9e6;
+            --note-bg: #edfafa;
+            --note-border: #00c7be;
+            --code-bg: #eef7f6;
+            --code-color: #0f2f2e;
+        }
+
+        /* 靛蓝主题（新增）：沉稳现代，Apple systemIndigo 风格 */
+        [data-theme="indigo"] {
+            --primary-bg: #f6f7fb;
+            --secondary-bg: #ffffff;
+            --text-color: #1e2233;
+            --header-color: #5856d6;  /* systemIndigo */
+            --accent-color: #6b6aed;
+            --button-bg: #eceefa;
+            --button-hover-bg: #e3e6f8;
+            --border-color: #dfe2f3;
+            --note-bg: #eef0fb;
+            --note-border: #6b6aed;
+            --code-bg: #f3f4fa;
+            --code-color: #1e2233;
+        }
+
+        /* ==================== 全局样式 ==================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; background: var(--primary-bg); color: var(--text-color); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Microsoft YaHei', 'PingFang SC', sans-serif; overflow: hidden; transition: background-color 0.3s ease, color 0.3s ease; }
+
+        /* ==================== 演示容器 ==================== */
+        #presentation-container { position: relative; width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; margin: auto; top: 50%; transform: translateY(-50%); background: var(--secondary-bg); box-shadow: 0 10px 40px var(--shadow-color); border-radius: 8px; overflow: hidden; transition: all 0.3s ease; }
+
+        /* ==================== 幻灯片基础样式 ==================== */
+        .slide { width: 100%; height: 100%; padding: 3vw; display: none; flex-direction: column; opacity: 0; transition: opacity 0.5s ease-in-out; position: absolute; }
+        .slide.active { display: flex; opacity: 1; z-index: 1; }
+        /* 使内容区域在 Flex 布局中可伸缩并承担滚动 */
+        .slide-content { width: 100%; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding-right: 1vw; }
+        .slide-content::-webkit-scrollbar { width: 8px; }
+        .slide-content::-webkit-scrollbar-track { background: var(--button-bg); border-radius: 4px; }
+        .slide-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        .slide-content::-webkit-scrollbar-thumb:hover { background: var(--button-hover-bg); }
+
+        /* ==================== 文本与标题样式 (应用字体缩放) ==================== */
+        h1, h2, h3 { color: var(--header-color); margin-bottom: 1.5vw; font-weight: 600; line-height: 1.3; }
+        h1 { font-size: calc(3.2vw * var(--font-scale)); border-bottom: 3px solid var(--accent-color); padding-bottom: 1vw; }
+        h2 { font-size: calc(2.5vw * var(--font-scale)); border-bottom: 2px solid var(--accent-color); padding-bottom: 0.8vw; }
+        h3 { font-size: calc(2.0vw * var(--font-scale)); color: var(--text-color); margin-top: 1vw; }
+        p, li { font-size: calc(1.5vw * var(--font-scale)); line-height: 1.8; margin-bottom: 1.2vw; }
+        /* 列表基础间距 */
+        ul { margin: 1vw 0 1vw 2vw; }
+        
+        /* 有序列表：自定义计数，保证编号始终在容器内且与内容对齐 */
+        .slide-content ol { counter-reset: ordered; list-style: none; margin: 1vw 0; padding-left: 0; }
+        .slide-content ol > li { position: relative; margin-left: 2.2em; }
+        .slide-content ol > li::before { counter-increment: ordered; content: counter(ordered) '.'; position: absolute; left: -2.2em; width: 2em; text-align: right; color: var(--text-color); font-weight: 600; }
+        strong { color: var(--header-color); font-weight: 600; }
+        .text-sm { font-size: calc(1.2vw * var(--font-scale)); }
+        .text-center { text-align: center; }
+        a { color: var(--header-color); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* 标题页布局 (应用字体缩放) */
+        .title-slide { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(135deg, var(--secondary-bg) 0%, var(--primary-bg) 100%); overflow: hidden; }
+        .title-slide h1 { font-size: calc(4vw * var(--font-scale)); border: none; margin-bottom: 2vw; background: linear-gradient(90deg, var(--header-color), var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .title-slide .subtitle { font-size: calc(2vw * var(--font-scale)); color: var(--text-color); opacity: 0.8; margin-bottom: 3vw; }
+        .title-slide .author { font-size: calc(1.8vw * var(--font-scale)); margin-bottom: 0.5vw; }
+        .title-slide .institution { font-size: calc(1.5vw * var(--font-scale)); margin-bottom: 0.5vw; }
+        .title-slide .date { font-size: calc(1.3vw * var(--font-scale)); opacity: 0.6; }
+        
+        /* 布局与组件 (应用字体缩放) */
+        .columns { display: flex; gap: 2vw; width: 100%; align-items: flex-start; }
+        .column { flex: 1; min-width: 0; }
+        .column-45 { flex: 0 0 45%; }
+        .column-55 { flex: 0 0 55%; }
+        figure { margin: 1vw 0; text-align: center; }
+        img { max-width: 100%; max-height: 60vh; height: auto; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow-color); }
+        figcaption { margin-top: 0.8vw; font-size: calc(1.1vw * var(--font-scale)); color: var(--text-color); opacity: 0.7; font-style: italic; }
+        img.clickable { cursor: zoom-in; transition: transform 0.3s, box-shadow 0.3s; }
+        img.clickable:hover { transform: scale(1.02); box-shadow: 0 8px 20px var(--shadow-color); }
+        pre { background: var(--code-bg); color: var(--code-color); padding: 1vw; margin: 1vw 0; border-radius: 6px; font-size: calc(1.1vw * var(--font-scale)); line-height: 1.6; overflow-x: auto; max-height: 45vh; }
+        .note { padding: 1vw 1.2vw; margin-top: 1.5vw; border-radius: 8px; border-left: 4px solid var(--note-border); background: var(--note-bg); font-size: calc(1.3vw * var(--font-scale)); }
+        table { width: 90%; margin: 1.5vw auto; border-collapse: collapse; font-size: calc(1.3vw * var(--font-scale)); box-shadow: 0 2px 8px var(--shadow-color); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 1vw; text-align: center; border-bottom: 1px solid var(--border-color); }
+        th { background: var(--button-bg); color: var(--header-color); font-weight: 600; }
+        tbody tr:nth-child(even) { background-color: var(--primary-bg); }
+        tbody tr:hover { background: var(--button-hover-bg); transition: background 0.3s ease; }
+
+        /* ==================== 图片全屏展示 ==================== */
+        #image-lightbox { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); display: none; align-items: center; justify-content: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease-in-out; padding: 20px; box-sizing: border-box; }
+        #image-lightbox.visible { display: flex; opacity: 1; }
+        #image-lightbox.fit-width { overflow-y: auto; align-items: flex-start; }
+        #lightbox-img { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 0 30px rgba(0,0,0,0.5); border-radius: 8px; }
+        #image-lightbox.fit-width #lightbox-img { width: 100%; max-width: 100%; max-height: none; margin-top: 60px; margin-bottom: 20px; }
+        .lightbox-close, .lightbox-toggle { position: absolute; top: 20px; color: white; background-color: rgba(30, 30, 30, 0.7); border: none; cursor: pointer; border-radius: 5px; padding: 8px 15px; font-family: sans-serif; transition: background-color 0.2s; z-index: 2001; }
+        .lightbox-close:hover, .lightbox-toggle:hover { background-color: rgba(0, 0, 0, 0.9); }
+        .lightbox-close { right: 20px; font-size: 30px; line-height: 1; padding: 5px 15px; }
+        .lightbox-toggle { right: 85px; font-size: 16px; }
+
+        /* ==================== 控制面板 (功能已恢复) ==================== */
+        #controls { position: fixed; bottom: 2vh; left: 50%; transform: translateX(-50%); background: var(--secondary-bg); backdrop-filter: blur(10px); padding: 1vh 2vh; border-radius: 50px; display: flex; align-items: center; gap: 1.5vh; z-index: 1000; box-shadow: 0 4px 20px var(--shadow-color); border: 1px solid var(--border-color); }
+        #controls button { background: var(--button-bg); color: var(--text-color); border: none; padding: 0.8vh 1.2vh; border-radius: 8px; cursor: pointer; font-size: 1.8vh; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; min-width: 3.5vh; height: 3.5vh; }
+        #controls button:hover { background: var(--button-hover-bg); transform: scale(1.1); }
+        #slide-counter { font-size: 1.6vh; font-weight: 500; min-width: 8vh; text-align: center; }
+        #progress-indicator { width: 20vh; height: 0.5vh; background: var(--button-bg); border-radius: 0.25vh; overflow: hidden; }
+        #progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-color), var(--header-color)); transition: width 0.5s ease; }
+        #theme-btn { position: relative; }
+        .theme-menu { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--secondary-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5vh; margin-bottom: 0.5vh; display: none; box-shadow: 0 4px 12px var(--shadow-color); z-index: 1001;}
+        .theme-menu.show { display: block; }
+        .theme-option { padding: 0.5vh 1vh; cursor: pointer; border-radius: 4px; font-size: 1.4vh; white-space: nowrap; }
+        .theme-option:hover { background: var(--button-bg); }
+    </style>
+</head>
+
+<body>
+    <div id="presentation-container">
+        
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div class="slide-content title-slide">
+                <h1>工作进展汇报与文献分享</h1>
+                <p class="subtitle">2025年秋季学期 组会展示</p>
+                <p class="author"><strong>BY2405316 严五金</strong></p>
+                <p class="institution">北京航空航天大学 航空科学与工程学院</p>
+                <p class="date" id="current-date"></p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Work Summary -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>本周工作内容汇报</h1>
+                <ol>
+                    <li>
+                        <h3>学习开源框架</h3>
+                        <p>学习了 XLB 和 FOS 两套开源框架，初步了解其实现原理与代码结构。</p>
+                    </li>
+                    <li>
+                        <h3>AP-Hybrid-PINN 算例补充</h3>
+                        <p>完成了 AP-Hybrid-PINN 方法的相关算例补充与验证工作。</p>
+                    </li>
+                    <li>
+                        <h3>文献迁移与复现</h3>
+                        <p>开始迁移和复现 Liu et al. (2021) 关于行星大气偏振辐射传输的格子玻尔兹曼方法的工作，后续需要和师兄进一步讨论方案。</p>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Slide 3 to 14: 内容保持不变... -->
+        <!-- Slide 3: Paper Intro -->
+        <div class="slide">
+            <div class="slide-content title-slide">
+                <h2 style="font-size: 2.5vw; color: var(--header-color); border: none;">文献分享</h2>
+                <h1 style="font-size: 3.5vw;">FOS: A fully integrated open-source program for Fast Optical Spectrum calculations of nanoparticle media</h1>
+                <p class="author text-sm" style="margin-top: 2vw;">Daniel Carne, Joseph Peoples, Xiulin Ruan, et al.</p>
+                <p class="date text-sm">Purdue University</p>
+                <p class="date text-sm" style="font-style: italic;">Computer Physics Communications 307 (2025) 109393</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Background -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>研究背景与动机</h1>
+                <h3>核心挑战</h3>
+                <p>计算纳米颗粒介质（如辐射制冷涂料、太阳能加热液体）的光谱响应（反射、吸收、透射）是一个复杂且计算成本高昂的任务。</p>
+                <h3>现有工具的局限性</h3>
+                <ul>
+                    <li><strong>功能分散：</strong>现有的开源代码通常只包含完整流程的一部分，例如，要么只做米氏散射（Mie theory），要么只做蒙特卡洛（Monte Carlo）光子传输，用户需要自行整合。</li>
+                    <li><strong>计算效率低：</strong>传统的数值方法（如FDTD）非常耗时，难以用于材料优化和高通量设计。</li>
+                    <li><strong>使用门槛高：</strong>需要研究者具备跨越多种物理模型和编程工具的能力。</li>
+                </ul>
+                <div class="note">
+                    <strong>研究动机：</strong> 开发一个<strong>功能全面集成、计算速度极快、易于使用</strong>的开源程序，打破现有工具的壁垒，加速新材料和新设计（如辐射制冷涂料）的发现过程。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: FOS Workflow -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>FOS 框架：一体化解决方案</h1>
+                <p>FOS (希腊语中的“光”)，提供了一个从输入到输出的完整、高效的计算流程。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d2v6pijef24c73b39j40_2.jpg?x=133&y=153&w=1477&h=366&r=0" alt="FOS Workflow" class="clickable"/>
+                    <figcaption>Fig. 1. FOS 完整工作流程图</figcaption>
+                </figure>
+                <ol>
+                    <li><strong>输入：</strong>通过简单的文本文件定义材料属性、几何结构等。</li>
+                    <li><strong>预处理：</strong>自动进行波长匹配和数据插值。</li>
+                    <li><strong>散射特性计算：</strong>基于<strong>米氏散射理论</strong>计算颗粒的散射、吸收系数和不对称因子。</li>
+                    <li><strong>光子传输模拟：</strong>采用<strong>蒙特卡洛 (MC)</strong> 或<strong>神经网络 (NN)</strong> 方法。</li>
+                    <li><strong>输出：</strong>生成光谱响应曲线（R, A, T）和集成的太阳光谱属性。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Slide 6: Input Format -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>方法：简洁的输入文件格式</h1>
+                <p>用户通过一个主输入文件控制所有模拟，文件分为<strong>Header</strong>（全局设置）和<strong>Body</strong>（具体模拟设置）。</p>
+                 <div class="columns">
+                    <div class="column">
+                        <pre><code># Header: 全局设置
+MC # 选择蒙特卡洛方法
+Output: test # 输出文件前缀
+Particle 1: TiO2.txt # 导入颗粒材料
+Matrix 1: Air.txt # 导入基底材料
+Solar: am15.txt # 太阳光谱文件
+# ...
+# Body: 定义具体模拟
+Sim 1 # 第一个模拟
+Upper: Matrix 1 # 上边界
+Layer 1 # 第一层
+# ...</code></pre>
+                    </div>
+                    <div class="column">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d2v6pijef24c73b39j40_2.jpg?x=106&y=617&w=756&h=376&r=0" alt="Schematic" class="clickable" style="margin-top:0;"/>
+                            <figcaption>Fig. 2. 基于输入文件示例的双层介质示意图。</figcaption>
+                        </figure>
+                    </div>
+                </div>
+                <div class="note">
+                    <strong>特点：</strong>语法简单直观，大小写不敏感，支持注释，大大降低了使用门槛。
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Scattering Properties -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>方法：基于米氏理论的散射特性计算</h1>
+                <p>除非用户提供预计算数据，FOS 使用米氏理论计算球形或核壳颗粒的散射特性。</p>
+                <div class="columns">
+                    <div class="column">
+                        <h3>核心步骤</h3>
+                        <ol>
+                            <li>计算尺寸参数 $x, y$。</li>
+                            <li>计算米氏系数 $a_n, b_n$。</li>
+                            <li>计算单个颗粒的散射/消光截面 $C_{sca}, C_{ext}$。</li>
+                            <li>通过有效介质理论，计算介质的 $\mu_s, \mu_a$ 和 $g$。</li>
+                            <li>对高体积分数 (>8%) 进行依赖性散射校正。</li>
+                        </ol>
+                    </div>
+                    <div class="column">
+                        <h3>加速与优化</h3>
+                        <ul>
+                            <li><strong>贝塞尔函数：</strong>采用递推关系计算，显著提升速度。</li>
+                            <li><strong>尺寸分布：</strong>支持高斯分布，更贴近实际情况。</li>
+                            <li><strong>核壳结构：</strong>内置了针对核壳纳米颗粒的算法。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Photon Transport -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>方法：光子传输模拟 (MC vs. NN)</h1>
+                <p>FOS 提供两种模式来求解辐射传输方程，以获得最终的光谱响应。</p>
+                <div class="columns">
+                    <div class="column">
+                        <h3>蒙特卡洛 (Monte Carlo)</h3>
+                        <ul>
+                            <li><strong>原理：</strong>追踪大量独立光子在介质中的随机游走过程。</li>
+                            <li><strong>优点：</strong>结果精确，无需简化假设，可处理任意边界条件。</li>
+                            <li><strong>加速：</strong>实现了<strong>CPU并行计算</strong>。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>神经网络 (Neural Network)</h3>
+                        <ul>
+                            <li><strong>原理：</strong>使用预训练模型直接预测 R, A, T。</li>
+                            <li><strong>优点：</strong>速度极快，比并行MC快 <strong>1-3个数量级</strong>。</li>
+                            <li><strong>限制：</strong>只能用于空气边界，且材料属性需在训练集范围内。</li>
+                        </ul>
+                    </div>
+                </div>
+                <h3>神经网络训练数据范围</h3>
+                <table>
+                    <thead><tr><th>光学属性</th><th>范围</th></tr></thead>
+                    <tbody>
+                        <tr><td>基底折射率 (实部)</td><td>1 - 7</td></tr>
+                        <tr><td>吸收系数 (cm⁻¹)</td><td>0 - 1,000,000</td></tr>
+                        <tr><td>散射系数 (cm⁻¹)</td><td>0 - 200,000</td></tr>
+                        <tr><td>不对称因子 g</td><td>0 - 1</td></tr>
+                        <tr><td>介质厚度 (µm)</td><td>5 - 500</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Slide 9: Example 1 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>算例一：辐射制冷复合材料与程序验证</h1>
+                <div class="columns">
+                    <div class="column column-55">
+                       <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d2v6pijef24c73b39j40_5.jpg?x=120&y=141&w=1504&h=1122&r=0" alt="Radiative Cooling Results" class="clickable" style="max-height: 70vh;"/>
+                            <figcaption>Fig. 3. 辐射制冷材料模拟与FOS验证</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column column-45">
+                        <h3>结果解读</h3>
+                        <ul>
+                            <li><strong>(A) 波长间隔影响：</strong>模拟BaSO₄涂料。精细的波长间隔能更好地捕捉光谱细节。</li>
+                            <li><strong>(B) NN vs. MC 精度：</strong>神经网络预测精度高（平均误差0.0018），且批量任务加速效果可达 <strong>258倍</strong>。</li>
+                            <li><strong>(C) Mie理论验证：</strong>FOS计算结果与 <strong>miepython</strong> 代码<strong>完全一致</strong>。</li>
+                            <li><strong>(D) MC模拟验证：</strong>FOS预测结果与经典 <strong>MCML</strong> 程序高度吻合（平均误差0.0004）。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 10: Example 2 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>算例二：硅-水纳米流体用于太阳能加热</h1>
+                <p>模拟硅(Si)纳米颗粒在水中的太阳能吸收，以增强蒸发速率。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d2v6pijef24c73b39j40_5.jpg?x=129&y=1440&w=1486&h=570&r=0" alt="Si-water results" class="clickable" style="max-height: 45vh;"/>
+                    <figcaption>Fig. 4. Si-水纳米流体的吸收光谱</figcaption>
+                </figure>
+                <div class="columns">
+                    <div class="column">
+                        <h3>(A) 不同颗粒尺寸的影响</h3>
+                        <p>随着尺寸变化，由米氏共振引起的吸收峰位置会发生显著移动。这表明可以通过调控粒径来选择性地增强特定波段的吸收。</p>
+                    </div>
+                    <div class="column">
+                        <h3>(B) 颗粒尺寸分布的影响</h3>
+                        <p>尺寸分布会“平滑”掉尖锐的共振吸收峰，使吸收曲线趋于平缓。这一现象在设计宽谱吸收材料或调整颜色时非常重要。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Example 3 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>算例三：Fe₂O₃-TiO₂-亚克力多层彩色涂料</h1>
+                <p>展示FOS处理多层、多颗粒体系的能力，用于设计彩色辐射制冷涂料。</p>
+                <div class="columns">
+                    <div class="column column-55">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d2v6pijef24c73b39j40_6.jpg?x=126&y=871&w=1495&h=1185&r=0" alt="Colored Paint Results" class="clickable" style="max-height: 60vh;"/>
+                            <figcaption>Fig. 5. 双层彩色涂料的反射光谱与颜色</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column column-45">
+                        <h3>(A) 设计理念</h3>
+                        <p>顶层是Fe₂O₃ (提供颜色)，底层是TiO₂ (高反射)。短波长的光与顶层作用，长波长的光穿透后被底层反射，实现颜色与高太阳反射率的平衡。</p>
+                        <h3>(B, C) 参数影响</h3>
+                        <p>结果表明，顶层Fe₂O₃的<strong>体积分数 (VF)</strong> 和<strong>厚度 (T)</strong> 对涂料的最终颜色和反射光谱有显著影响。FOS的多层建模能力可以高效地优化这些参数。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Example 4 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>算例四：中空 SiO₂ 纳米颗粒（核壳结构）</h1>
+                <p>展示FOS对核壳（Core-Shell）纳米颗粒的建模能力，其光学特性与实心颗粒不同。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d2v6pijef24c73b39j40_7.jpg?x=126&y=149&w=1492&h=566&r=0" alt="Hollow SiO2 Results" class="clickable" style="max-height: 45vh;"/>
+                    <figcaption>Fig. 6. 中空(核壳)与实心SiO₂颗粒的反射光谱对比</figcaption>
+                </figure>
+                <div class="columns">
+                    <div class="column">
+                        <h3>(A) 中空 SiO₂ (核:空气, 壳:SiO₂)</h3>
+                        <p>固定内径(0.5µm)，改变壳层厚度（使外径从0.7µm到1.1µm）。结果显示壳层厚度对光谱有调节作用。</p>
+                    </div>
+                    <div class="column">
+                        <h3>(B) 实心 SiO₂ 与对比</h3>
+                        <p>对比发现，在短波段，两者反射率相似；但在长波段，中空颗粒的反射率显著下降。这种特性可用于实现光谱选择性。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Conclusion -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结论</h1>
+                <div class="columns">
+                    <div class="column">
+                        <h3>主要贡献</h3>
+                        <ul>
+                            <li><strong>降低门槛：</strong>将米氏理论、光子传输等多种必要方法<strong>集成于一个易用的程序</strong>中。</li>
+                            <li><strong>提升效率：</strong>通过优化的算法、并行计算和<strong>预训练神经网络</strong>，极大加速了计算过程。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>价值与展望</h3>
+                        <ul>
+                            <li>FOS能够高效计算纳米颗粒的辐射特性，加速高通量设计和优化。</li>
+                            <li>可推动辐射制冷涂料、月尘建模、太阳能加热等领域的发展。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="note" style="text-align: center; margin-top: 2vw;">
+                    <strong>开源项目地址:</strong> <a href="https://github.com/FastOpticalSpectrum/FOS" target="_blank" rel="noopener noreferrer">github.com/FastOpticalSpectrum/FOS</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Q&A -->
+        <div class="slide">
+            <div class="slide-content title-slide">
+                <h1>感谢聆听</h1>
+                <p class="subtitle" style="margin-top: 3vw;">问答环节 (Q&A)</p>
+            </div>
+        </div>
+        
+        <!-- Image Lightbox -->
+        <div id="image-lightbox">
+            <span class="lightbox-close" title="关闭 (Esc)">×</span>
+            <button class="lightbox-toggle" title="切换视图模式"></button>
+            <img src="" alt="全屏视图" id="lightbox-img">
+        </div>
+
+    </div>
+
+    <!-- [恢复] 完整的控制面板 -->
+    <div id="controls">
+        <button id="prev-btn" title="上一页 (←)">◀</button>
+        <button id="first-btn" title="第一页 (Home)">⏮</button>
+        <span id="slide-counter">1 / 14</span>
+        <button id="last-btn" title="最后一页 (End)">⏭</button>
+        <button id="next-btn" title="下一页 (→)">▶</button>
+        <div id="progress-indicator"><div id="progress-bar"></div></div>
+        <button id="goto-btn" title="跳转 (G)">🔢</button>
+        <button id="font-dec-btn" title="减小字号">A-</button>
+        <button id="font-inc-btn" title="增大字号">A+</button>
+        <button id="theme-btn" title="切换主题">🎨
+            <div class="theme-menu" id="theme-menu">
+                <div class="theme-option" data-theme="default">专业蓝</div>
+                <div class="theme-option" data-theme="dark">深色</div>
+                <div class="theme-option" data-theme="green">清新绿</div>
+                <div class="theme-option" data-theme="mint">薄荷青</div>
+                <div class="theme-option" data-theme="indigo">靛蓝</div>
+            </div>
+        </button>
+        <button id="fullscreen-btn" title="全屏 (F)">⛶</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // [恢复] 动态设置日期
+            function setDynamicDate() {
+                const dateElement = document.getElementById('current-date');
+                if (dateElement) {
+                    const today = new Date();
+                    dateElement.textContent = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+                }
+            }
+            setDynamicDate();
+
+            // [恢复] 获取所有需要的元素
+            const presentationContainer = document.getElementById('presentation-container');
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            const controls = {
+                prev: document.getElementById('prev-btn'),
+                next: document.getElementById('next-btn'),
+                first: document.getElementById('first-btn'),
+                last: document.getElementById('last-btn'),
+                goto: document.getElementById('goto-btn'),
+                fontDec: document.getElementById('font-dec-btn'),
+                fontInc: document.getElementById('font-inc-btn'),
+                theme: document.getElementById('theme-btn'),
+                themeMenu: document.getElementById('theme-menu'),
+                fullscreen: document.getElementById('fullscreen-btn'),
+                counter: document.getElementById('slide-counter'),
+                progressBar: document.getElementById('progress-bar')
+            };
+
+            let currentSlide = 0;
+            let fontScale = 1.0;
+
+            // 取消“动态安全边距”逻辑，统一由 .slide-content 负责滚动
+            
+            // [恢复] 字体缩放功能
+            function updateFontScale() {
+                presentationContainer.style.setProperty('--font-scale', fontScale);
+            }
+            controls.fontInc.addEventListener('click', () => {
+                fontScale = Math.min(1.5, fontScale + 0.1);
+                updateFontScale();
+            });
+            controls.fontDec.addEventListener('click', () => {
+                fontScale = Math.max(0.7, fontScale - 0.1);
+                updateFontScale();
+            });
+
+            // [恢复] 主题切换功能
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('presentation-theme', theme);
+                controls.themeMenu.classList.remove('show');
+            }
+            controls.theme.addEventListener('click', (e) => { e.stopPropagation(); controls.themeMenu.classList.toggle('show'); });
+            document.addEventListener('click', () => controls.themeMenu.classList.remove('show'));
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', (e) => { e.stopPropagation(); setTheme(option.dataset.theme); });
+            });
+
+            // [恢复] 全屏功能
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    presentationContainer.requestFullscreen().catch(err => console.error(`Fullscreen error: ${err.message}`));
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            controls.fullscreen.addEventListener('click', toggleFullscreen);
+            // 保留：无
+
+            // 幻灯片导航
+            function showSlide(index) {
+                if (index < 0 || index >= totalSlides) return;
+                slides.forEach((s, i) => s.classList.toggle('active', i === index));
+                currentSlide = index;
+                controls.counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                controls.progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+                if (window.MathJax && window.MathJax.typeset) {
+                    MathJax.typesetPromise([slides[index]]).catch(err => console.error('MathJax error:', err));
+                }
+            }
+            
+            const slideActions = {
+                next: () => showSlide(currentSlide + 1),
+                prev: () => showSlide(currentSlide - 1),
+                first: () => showSlide(0),
+                last: () => showSlide(totalSlides - 1),
+                goto: () => {
+                    const numStr = prompt(`跳转到第几页? (1-${totalSlides})`);
+                    if (numStr) {
+                        const num = parseInt(numStr, 10) - 1;
+                        if (!isNaN(num) && num >= 0 && num < totalSlides) showSlide(num);
+                    }
+                }
+            };
+            controls.next.addEventListener('click', slideActions.next);
+            controls.prev.addEventListener('click', slideActions.prev);
+            controls.first.addEventListener('click', slideActions.first);
+            controls.last.addEventListener('click', slideActions.last);
+            controls.goto.addEventListener('click', slideActions.goto);
+
+            // 图片灯箱功能
+            const lightbox = document.getElementById('image-lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxClose = lightbox.querySelector('.lightbox-close');
+            const lightboxToggle = lightbox.querySelector('.lightbox-toggle');
+            function openLightbox(src) {
+                lightboxImg.src = src;
+                lightbox.classList.remove('fit-width');
+                lightboxToggle.textContent = '⤢ 适应宽度';
+                lightbox.classList.add('visible');
+            }
+            function closeLightbox() { lightbox.classList.remove('visible'); }
+            document.querySelectorAll('img.clickable').forEach(img => img.addEventListener('click', (e) => { e.stopPropagation(); openLightbox(img.src); }));
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => (e.target === lightbox) && closeLightbox());
+            lightboxToggle.addEventListener('click', () => {
+                const isFitWidth = lightbox.classList.toggle('fit-width');
+                lightboxToggle.textContent = isFitWidth ? '↔ 适应屏幕' : '⤢ 适应宽度';
+            });
+
+            // [恢复] 完整的键盘事件监听
+            document.addEventListener('keydown', (e) => {
+                if (lightbox.classList.contains('visible')) {
+                    if (e.key === 'Escape') closeLightbox();
+                    return;
+                }
+                switch(e.key) {
+                    case 'ArrowRight': case ' ': e.preventDefault(); slideActions.next(); break;
+                    case 'ArrowLeft': e.preventDefault(); slideActions.prev(); break;
+                    case 'Home': e.preventDefault(); slideActions.first(); break;
+                    case 'End': e.preventDefault(); slideActions.last(); break;
+                    case 'f': case 'F': e.preventDefault(); toggleFullscreen(); break;
+                    case 'g': case 'G': e.preventDefault(); slideActions.goto(); break;
+                    case 'Escape': if (document.fullscreenElement) document.exitFullscreen(); break;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+                    e.preventDefault();
+                    controls.fontInc.click();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+                    e.preventDefault();
+                    controls.fontDec.click();
+                }
+            });
+            
+            // 初始化
+            const savedTheme = localStorage.getItem('presentation-theme') || 'default';
+            setTheme(savedTheme);
+            showSlide(0);
+        });
+    </script>
+</body>
+</html>

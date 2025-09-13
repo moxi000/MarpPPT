@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文献分享：一种混合消色差超透镜</title>
+    <script>
+        // MathJax configuration
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+        </script>
+    <style>
+        :root {
+            --primary-bg: #f4f4f9;
+            --secondary-bg: #ffffff;
+            --text-color: #333333;
+            --header-color: #007BFF;
+            --accent-color: #ffc107;
+            --button-bg: #e9ecef;
+            --button-hover-bg: #dee2e6;
+            --border-color: #ced4da;
+            --note-text-color: #495057;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+        }
+
+        #presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 56.25vw;
+            /* 16:9 Aspect Ratio */
+            max-height: 100vh;
+            max-width: 177.78vh;
+            /* 16:9 Aspect Ratio */
+            margin: auto;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--secondary-bg);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border: 1px solid #ddd;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 2.5vw;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            position: absolute;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            z-index: 1;
+        }
+
+        .slide-content {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 15px;
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 4px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background-color: #b3b3b3;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--header-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 3.0vw;
+        }
+
+        h2 {
+            font-size: 2.4vw;
+        }
+
+        h3 {
+            font-size: 2.0vw;
+        }
+
+        p,
+        li {
+            font-size: 1.4vw;
+            line-height: 1.6;
+        }
+
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .title-slide h1,
+        .title-slide h2 {
+            width: auto;
+            border: none;
+        }
+
+        .title-slide h1 {
+            font-size: 4.5vw;
+            font-weight: 700;
+        }
+
+        .title-slide h2 {
+            font-size: 2.2vw;
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        ul {
+            text-align: left;
+            width: 95%;
+            padding-left: 20px;
+        }
+
+        strong {
+            color: var(--header-color);
+            font-weight: 600;
+        }
+
+        dl dt {
+            font-weight: bold;
+            color: var(--header-color);
+            margin-top: 1em;
+        }
+
+        dl dd {
+            margin-left: 2em;
+        }
+
+        .definition-list-slide dt {
+            font-size: 1.8vw;
+            color: var(--header-color);
+            font-weight: 600;
+            margin-top: 1.2em;
+        }
+
+        .definition-list-slide dd {
+            font-size: 1.5vw;
+            margin-left: 2em;
+            line-height: 1.6;
+        }
+
+        .columns {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .column {
+            flex: 1;
+        }
+
+        figure {
+            margin: 1em 0;
+            text-align: center;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 50vh;
+            height: auto;
+            border-radius: 8px;
+            background: #fff;
+            padding: 5px;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        figcaption {
+            margin-top: 0.5em;
+            font-size: 1.0vw;
+            color: var(--note-text-color);
+            font-style: italic;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1em 0;
+            font-size: 1.0vw;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: var(--button-bg);
+            color: var(--header-color);
+            font-weight: 600;
+        }
+
+        .math-display {
+            font-size: 1.6vw;
+            margin: 1em 0;
+        }
+
+        .note {
+            font-size: 1.1vw;
+            color: var(--note-text-color);
+            border-left: 3px solid var(--accent-color);
+            padding: 10px 15px;
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            border-radius: 0 5px 5px 0;
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 100;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #controls button {
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        #controls button:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        #controls button:active {
+            transform: scale(0.95);
+        }
+
+        #slide-counter {
+            font-size: 16px;
+            font-weight: 500;
+            min-width: 50px;
+            text-align: center;
+            color: #555;
+        }
+
+        @media (max-width: 800px) {
+            h1 {
+                font-size: 5.5vw;
+            }
+
+            h2 {
+                font-size: 4.5vw;
+            }
+
+            h3 {
+                font-size: 4.0vw;
+            }
+
+            p,
+            li {
+                font-size: 3.2vw;
+            }
+
+            .title-slide h1 {
+                font-size: 8vw;
+            }
+
+            .title-slide h2 {
+                font-size: 4.5vw;
+            }
+
+            .definition-list-slide dt {
+                font-size: 4.0vw;
+            }
+
+            .definition-list-slide dd {
+                font-size: 3.5vw;
+            }
+
+            figcaption {
+                font-size: 2.2vw;
+            }
+
+            table {
+                font-size: 2.2vw;
+            }
+
+            .columns {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="presentation-container">
+
+        <!-- Slide 1: Title Page -->
+        <div class="slide active">
+            <div class="slide-content title-slide">
+                <h1>一种混合消色差超透镜</h1>
+                <br>
+                <h2>A Hybrid Achromatic Metalens</h2>
+                <br>
+                <p style="font-size: 1.5vw;">F. Balli, M. Sultan, Sarah K. Lami & J. T. Hastings</p>
+                <p style="font-size: 1.3vw; color: var(--note-text-color);">University of Kentucky</p>
+                <p style="font-size: 1.2vw; font-style: italic;">Nature Communications, 2020</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Introduction & Motivation -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>1. 研究背景与动机</h2>
+                <h3>什么是超透镜 (Metalens)？</h3>
+                <div class="columns">
+                    <div class="column">
+                        <p>超透镜是一种利用亚波长结构调控光场的<strong>超薄光学元件</strong>。</p>
+                        <p><strong>优点:</strong></p>
+                        <ul>
+                            <li><strong>轻薄化:</strong> 体积和重量远小于传统折射透镜。</li>
+                            <li><strong>功能集成:</strong> 可实现偏振控制等新功能。</li>
+                            <li><strong>平面工艺:</strong> 可利用类似微电子的平面工艺大规模生产。</li>
+                        </ul>
+                        <p><strong>核心挑战: 色差 (Chromatic Aberration)</strong></p>
+                        <ul>
+                            <li>大多数超透镜仅在设计波长附近具有高聚焦效率。</li>
+                            <li>实现<strong>消色差</strong>（宽带工作）的超透镜，其<strong>聚焦效率</strong>通常会大幅降低。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d16d1ubef24c73d1m370_1.jpg?x=160&y=1148&w=1452&h=733&r=0"
+                                alt="Fig. 1 Overview">
+                            <figcaption>图1: (a) HAML宽带聚焦示意图 (d,e,f) HAML的SEM图 (i) 成像结果</figcaption>
+                        </figure>
+                    </div>
+                </div>
+                <p class="note"><strong>本文目标:</strong>
+                    提出一种新型超透镜结构，旨在打破<strong>宽带消色差</strong>与<strong>高聚焦效率</strong>之间的固有矛盾。</p>
+            </div>
+        </div>
+
+        <!-- Slide 3: Existing Solutions & Their Limits -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>2. 现有消色差技术及其局限性</h2>
+                <div class="columns">
+                    <div class="column">
+                        <h3>(1) 复杂纳米结构超透镜</h3>
+                        <p>通过构建庞大的纳米结构库（不同形状、尺寸），筛选出能在宽带内提供所需相位和高透射率的单元。</p>
+                        <ul>
+                            <li><strong>局限性:</strong>
+                                <ul>
+                                    <li>需要奇特的、高深宽比的柱状结构。</li>
+                                    <li>制造难度极大。</li>
+                                    <li>聚焦效率仍无法与单色超透镜媲美。</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>(2) 多级衍射透镜 (MDL)</h3>
+                        <p>放宽了单层特征高度的限制，可以用较低分辨率的光刻技术制造。</p>
+                        <ul>
+                            <li><strong>局限性:</strong>
+                                <ul>
+                                    <li>依赖<strong>全局优化算法</strong>进行设计，计算量巨大，限制了设计空间的探索。</li>
+                                    <li>聚焦效率的提升仍然有限，仅略高于传统消色差超透镜。</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="note">现有方法在实现高效宽带消色差方面仍面临巨大挑战，亟需新的设计思路。</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Our Proposed Solution: The HAML -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>3. 本文方案: 混合消色差超透镜 (HAML)</h2>
+                <h3>核心思想：融合相位板与超透镜</h3>
+                <p>将一个<strong>相位板 (Phase Plate)</strong> 和一个<strong>超透镜 (Metalens)</strong> 合并成一个单一的、轻薄的元件。分为两种类型：</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d16d1ubef24c73d1m370_1.jpg?x=160&y=1148&w=1452&h=733&r=0"
+                        alt="HAML Structures and Imaging">
+                    <figcaption>图1: (b) 融合型(Merged) HAML单元结构；(c) 空气间隔型(Air-spaced) HAML单元结构。</figcaption>
+                </figure>
+                <h3>主要优势</h3>
+                <ul>
+                    <li><strong>设计高效:</strong> 采用<strong>递归光线追迹</strong>和<strong>相位库</strong>相结合的方式，避免了计算密集型的全局搜索。</li>
+                    <li><strong>制造友好:</strong> 可采用低折射率材料，通过<strong>双光子聚合光刻</strong>或模塑成型等方式制造，兼容3D形貌。</li>
+                    <li><strong>性能优越:</strong> 放宽了结构高度限制，提供了更多设计自由度，有望同时实现<strong>消色差、高效率和偏振不敏感</strong>。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 5: HAML Design Principle -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>4. HAML 设计原理: 递归光线追迹</h2>
+                <p>本文采用一种高效的<strong>递归光线追迹算法</strong>来设计双元件（相位板+超透镜）的相位分布，以实现消色差。</p>
+                <div class="columns">
+                    <div class="column">
+                        <h3>算法流程 (见图2a):</h3>
+                        <ol>
+                            <li>用<strong>最短波长 $\lambda_{\min}$</strong> 从物方追迹光线至像方（蓝线）。</li>
+                            <li>用<strong>最长波长 $\lambda_{\max}$</strong> 从像方反向追迹光线至物方（红线）。</li>
+                            <li>迭代更新两个光学元件（TE1, TE2）在光线经过位置的<strong>相位梯度 $\phi'(r)$</strong>。</li>
+                            <li>当相位梯度收敛成一个闭合环路时（见图2b,c），设计完成。</li>
+                        </ol>
+                        <p class="note">这种方法将消色差问题转化为求解一组相位梯度分布，比全局优化算法快得多。</p>
+                    </div>
+                    <div class="column">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d16d1ubef24c73d1m370_2.jpg?x=250&y=143&w=1263&h=1139&r=0"
+                                alt="Fig. 2 Design Process">
+                            <figcaption>图2: HAML设计过程。 (a) 递归光线追迹示意图。</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: HAML Design: Phase Requirements -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>5. HAML 设计: 相位求解与分配</h2>
+                <p>光线追迹算法得到每个元件（相位板和超透镜）所需的<strong>相位梯度 $\phi'(r)$</strong>，积分后得到最终的<strong>目标相位 $\phi(r)$</strong>。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d16d1ubef24c73d1m370_2.jpg?x=250&y=143&w=1263&h=1139&r=0"
+                        alt="Fig. 2 Design Process">
+                    <figcaption>图2: (b) Merged HAML的相位梯度曲线。第三象限（会聚）用于相位板，第一象限（发散）用于超透镜。(d) 对梯度积分后，得到最终需要实现的相位分布。
+                    </figcaption>
+                </figure>
+                <h3>相位实现策略:</h3>
+                <ul>
+                    <li><strong>相位板:</strong> 相位 $\phi_{pp} = \frac{2\pi}{\lambda}(n-1)t$，通过改变局部厚度 $t$ 来实现。</li>
+                    <li><strong>超透镜:</strong> 相位由纳米柱的直径 $d$ 和高度 $h$ 共同决定。</li>
+                    <li><strong>创新点:</strong> 为了避免制造高深宽比的纳米柱，将超透镜所需的部分相位<strong>“转移”</strong>到其下方的相位板上，通过增厚相位板来实现。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 7: Fabrication & Design Space -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>6. 制造工艺与设计空间探索</h2>
+                <h3>制造方法: 双光子聚合光刻</h3>
+                <p>采用Nanoscribe双光子光刻技术，利用飞秒激光在光刻胶（IP-Dip）中进行三维直写，可以精确制造出设计的3D结构。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d16d1ubef24c73d1m370_3.jpg?x=150&y=1219&w=1470&h=851&r=0"
+                        alt="Fig. 3 Design and Fabrication">
+                    <figcaption>图3: (d, e, f) 不同孔径和类型的HAML的SEM图，展示了高质量的制造结果。 (a) FDTD仿真建立的相位库。</figcaption>
+                </figure>
+                <h3>设计空间探索 (见图3c)</h3>
+                <ul>
+                    <li><strong>扩大设计空间:</strong>
+                        对于融合型HAML，理论设计出的NA有限（蓝色区域）。通过在相位板上额外增加一个双曲面厚度，可以在不显著牺牲效率的前提下，将NA从0.14提升至<strong>0.27</strong>。
+                    </li>
+                    <li><strong>更高NA:</strong> 对于需要更大NA和孔径的设计，则需要采用<strong>空气间隔型HAML</strong>（绿色区域），通过引入物理间隔 $S$ 来实现。
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 8: Experimental Results - Focusing Performance -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>7. 实验结果: 聚焦性能</h2>
+                <h3>宽带消色差与衍射极限聚焦</h3>
+                <p>在1000-1800 nm的超宽光谱范围内，对 fabricated HAML (NA=0.27, EPD=20μm) 进行了测试。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d16d1ubef24c73d1m370_4.jpg?x=188&y=150&w=1396&h=1171&r=0"
+                        alt="Fig. 4 Focusing Performance">
+                    <figcaption>图4: (a) 在不同波长下，焦斑均保持稳定，且形态清晰。(b) 焦斑的强度分布（蓝线）与理论艾里斑（红线）高度吻合，证明了衍射极限性能。</figcaption>
+                </figure>
+                <p class="note">结果表明，HAML在极宽的近红外波段内成功实现了<strong>消色差</strong>和<strong>衍射极限</strong>的聚焦能力。</p>
+            </div>
+        </div>
+
+        <!-- Slide 9: Key Results - Efficiency & Error -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>8. 核心结果: 效率、误差与成像</h2>
+                <h3>性能分析 (见图4)</h3>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d16d1ubef24c73d1m370_4.jpg?x=188&y=150&w=1396&h=1171&r=0"
+                        alt="Fig. 4 Performance Metrics">
+                    <figcaption>图4: (d) 聚焦效率曲线 (e) 焦距误差曲线</figcaption>
+                </figure>
+                <div class="columns">
+                    <div class="column">
+                        <h4>高聚焦效率</h4>
+                        <p>融合型HAML的平均效率<strong>>60%</strong>，在1800nm处最高可达<strong>~80%</strong>，显著优于传统消色差超透镜。</p>
+                    </div>
+                    <div class="column">
+                        <h4>低焦距误差</h4>
+                        <p>在整个800nm带宽内，焦距偏移极小（最大仅<strong>8.6%</strong>），证明了优异的消色差能力。</p>
+                    </div>
+                </div>
+                <h3>宽带成像能力</h3>
+                <p>使用HAML对1951 USAF分辨率测试卡进行宽带(1000-1700nm)成像，清晰分辨40.3 lp/mm，接近衍射极限。(见Slide 2中的图1i)</p>
+            </div>
+        </div>
+
+        <!-- Slide 10: Performance Comparison -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>9. 性能对比 (与SOTA工作)</h2>
+                <p>将HAML与已发表的先进消色差超透镜和衍射透镜进行比较。</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>方法</th>
+                            <th>波段 (nm)</th>
+                            <th>NA</th>
+                            <th>EPD (μm)</th>
+                            <th>平均效率</th>
+                            <th>最高效率</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>本文 HAML (Merged)</strong></td>
+                            <td><strong>1000-1800</strong></td>
+                            <td><strong>0.11</strong></td>
+                            <td><strong>40</strong></td>
+                            <td style="background-color: #e8f5e9;"><strong>~67%</strong></td>
+                            <td style="background-color: #e8f5e9;"><strong>~83%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>可见光GaN超透镜 [19]</td>
+                            <td>400-660</td>
+                            <td>0.106</td>
+                            <td>50</td>
+                            <td>~40%</td>
+                            <td>~67%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>本文 HAML (Merged)</strong></td>
+                            <td><strong>1000-1800</strong></td>
+                            <td><strong>0.06</strong></td>
+                            <td><strong>80</strong></td>
+                            <td style="background-color: #e8f5e9;"><strong>~66%</strong></td>
+                            <td style="background-color: #e8f5e9;"><strong>~75%</strong></td>
+                        </tr>
+                        <tr>
+                            <td>可见光MDL [23]</td>
+                            <td>450-650</td>
+                            <td>0.05</td>
+                            <td>100</td>
+                            <td>~42%</td>
+                            <td>N/A</td>
+                        </tr>
+                        <tr>
+                            <td>近红外超透镜 [15]</td>
+                            <td>1300-1600</td>
+                            <td>0.24</td>
+                            <td>100</td>
+                            <td>N/A</td>
+                            <td>~55%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="note"><strong>结论:</strong>
+                    无论在近红外还是与可见光器件对比，本文提出的HAML在<strong>工作带宽、平均效率和峰值效率</strong>上均表现出显著的优势。</p>
+            </div>
+        </div>
+
+        <!-- Slide 11: Validation and Design Space -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>10. 模型验证与设计空间扩展</h2>
+                <h3>仿真与实验对比</h3>
+                <p>对于小尺寸的HAML (20μm EPD)，进行了完整的FDTD仿真，并与实验结果对比，两者吻合良好，验证了设计模型的准确性。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d16d38ref24c73d1m3e0_2.jpg?x=200&y=263&w=1394&h=664&r=0"
+                        alt="Supp. Fig. 2 Simulation vs Experiment">
+                    <figcaption>补充图2: FWHM、效率和焦距误差的仿真（simulated）与实验（measured）结果对比。</figcaption>
+                </figure>
+                <h3>空气间隔(Air-Spaced) HAML的作用</h3>
+                <p>通过引入空气间隔 $S$ 可以突破融合型HAML的NA限制。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d16d38ref24c73d1m3e0_3.jpg?x=198&y=1254&w=1388&h=493&r=0"
+                        alt="Supp. Fig. 3 Air-spaced HAML design space">
+                    <figcaption>补充图3: NA和效率随空气间隔S的变化关系。间隔越大，可实现的NA越高，但效率会降低，揭示了设计上的权衡。</figcaption>
+                </figure>
+            </div>
+        </div>
+
+        <!-- Slide 12: Conclusion -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>11. 总结与展望</h2>
+                <h3>本文贡献</h3>
+                <div class="columns">
+                    <div class="column">
+                        <ul>
+                            <li><strong>提出新结构:</strong> 提出了一种混合消色差超透镜 (HAML)，通过融合相位板和超透镜，有效解决了宽带消色差与高效率的矛盾。</li>
+                            <li><strong>性能卓越:</strong> 在1000-1800nm的超宽带内实现了衍射极限聚焦，平均效率超过60%，最高达83%。</li>
+                            <li><strong>设计高效:</strong> 发展了一种基于递归光线追迹的设计方法，避免了复杂的全局优化，计算效率高。</li>
+                            <li><strong>制造可行:</strong> 验证了通过双光子光刻技术制造复杂3D HAML的可行性，且融合型HAML具有通过模塑进行大规模复制的潜力。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d16d1ubef24c73d1m370_1.jpg?x=160&y=1148&w=1452&h=733&r=0"
+                                alt="Fig. 1 Overview">
+                            <figcaption>HAML SEM图 (图1d,e,f)</figcaption>
+                        </figure>
+                    </div>
+                </div>
+                <h3>展望</h3>
+                <p>这种拥抱真三维几何结构的设计思路为开发高性能平面光学元件开辟了新途径，有望扩展到更复杂的成像系统和可见光波段。</p>
+            </div>
+        </div>
+
+        <!-- Slide 13: Q&A -->
+        <div class="slide">
+            <div class="slide-content title-slide">
+                <h1>感谢观看</h1>
+                <br>
+                <h2>问答环节 (Q&A)</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 控制器和导航 -->
+    <div id="controls">
+        <button id="prev-btn" title="上一页 (←)">←</button>
+        <span id="slide-counter">1 / 13</span>
+        <button id="next-btn" title="下一页 (→)">→</button>
+        <button id="fullscreen-btn" title="全屏">⛶</button>
+    </div>
+
+    <!-- JavaScript 逻辑 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const slideCounter = document.getElementById('slide-counter');
+            const presentationContainer = document.getElementById('presentation-container');
+
+            let currentSlide = 0;
+            const totalSlides = slides.length;
+
+            function updateSlideCounter() {
+                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            }
+
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                });
+                slides[index].classList.add('active');
+                currentSlide = index;
+                updateSlideCounter();
+
+                if (window.MathJax && window.MathJax.typeset) {
+                    MathJax.typesetPromise([slides[index]]).catch(function (err) {
+                        console.log('MathJax typesetting error: ' + err.message);
+                    });
+                }
+            }
+
+            function nextSlide() {
+                let next = currentSlide + 1;
+                if (next < totalSlides) {
+                    showSlide(next);
+                }
+            }
+
+            function prevSlide() {
+                let prev = currentSlide - 1;
+                if (prev >= 0) {
+                    showSlide(prev);
+                }
+            }
+
+            function toggleFullScreen() {
+                if (!document.fullscreenElement) {
+                    presentationContainer.requestFullscreen().catch(err => {
+                        alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            // Event Listeners
+            nextBtn.addEventListener('click', nextSlide);
+            prevBtn.addEventListener('click', prevSlide);
+            fullscreenBtn.addEventListener('click', toggleFullScreen);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === ' ') {
+                    let target = e.target;
+                    let isInsideScrollable = false;
+                    while (target != document.body) {
+                        if (target.scrollHeight > target.clientHeight && target.classList.contains('slide-content')) {
+                            isInsideScrollable = true;
+                            break;
+                        }
+                        target = target.parentElement;
+                    }
+                    if (!isInsideScrollable) {
+                        e.preventDefault();
+                    }
+                }
+
+                if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+                    if (!e.target.closest('.slide-content')) {
+                        e.preventDefault();
+                        nextSlide();
+                    }
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                    if (!e.target.closest('.slide-content')) {
+                        e.preventDefault();
+                        prevSlide();
+                    }
+                } else if (e.key === 'f' || e.key === 'F') {
+                    e.preventDefault();
+                    toggleFullScreen();
+                }
+            });
+
+            window.addEventListener('wheel', e => {
+                let target = e.target;
+                let canScroll = false;
+                while (target && target != document.body) {
+                    if (target.classList.contains('slide-content') && target.scrollHeight > target.clientHeight) {
+                        canScroll = true;
+                        break;
+                    }
+                    target = target.parentElement;
+                }
+                if (!canScroll) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            // Initial setup
+            showSlide(0);
+        });
+    </script>
+
+</body>
+
+</html>

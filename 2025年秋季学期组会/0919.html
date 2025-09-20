@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组会汇报 - XLB框架学习与工作进展</title>
+    
+    <!-- MathJax 配置 - 支持数学公式 -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+    
+    <style>
+        /* ==================== 主题变量 ==================== */
+        :root {
+            /* 默认主题 - 专业蓝 */
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --text-color: #2c3e50;
+            --header-color: #2563eb;
+            --accent-color: #3b82f6;
+            --button-bg: #e5e7eb;
+            --button-hover-bg: #d1d5db;
+            --border-color: #d1d5db;
+            --note-bg: #eff6ff;
+            --note-border: #3b82f6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --code-bg: #f3f4f6;
+            --code-color: #1f2937;
+            /* [新增] 字体缩放变量 */
+            --font-scale: 1.0; 
+        }
+
+        /* 深色主题 */
+        [data-theme="dark"] {
+            --primary-bg: #1a1a1a;
+            --secondary-bg: #262626;
+            --text-color: #e5e5e5;
+            --header-color: #60a5fa;
+            --accent-color: #3b82f6;
+            --button-bg: #404040;
+            --button-hover-bg: #525252;
+            --border-color: #404040;
+            --note-bg: #1e3a5f;
+            --note-border: #60a5fa;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --code-bg: #374151;
+            --code-color: #f3f4f6;
+        }
+        /* 绿色主题（优化：更清新、苹果风） */
+        [data-theme="green"] {
+            --primary-bg: #f6fbf7;    /* 柔和浅绿底 */
+            --secondary-bg: #ffffff;
+            --text-color: #0f2e1d;    /* 深绿偏中性文字 */
+            --header-color: #2ec866;  /* 系统绿风格 */
+            --accent-color: #34c759;  /* Apple systemGreen */
+            --button-bg: #e8f5ea;     /* 轻浅按钮背景 */
+            --button-hover-bg: #dff1e3;
+            --border-color: #d6eadb;  /* 柔和边框 */
+            --note-bg: #edf9f0;       /* 浅提示底 */
+            --note-border: #34c759;
+            --code-bg: #f1f6f2;
+            --code-color: #0f2e1d;
+        }
+
+        /* 薄荷主题（新增）：清新薄荷青，Apple systemMint 风格） */
+        [data-theme="mint"] {
+            --primary-bg: #f5fbfa;
+            --secondary-bg: #ffffff;
+            --text-color: #0f2f2e;
+            --header-color: #00c7be;  /* systemMint */
+            --accent-color: #20dad0;
+            --button-bg: #e6f7f5;
+            --button-hover-bg: #d7f2ef;
+            --border-color: #cde9e6;
+            --note-bg: #edfafa;
+            --note-border: #00c7be;
+            --code-bg: #eef7f6;
+            --code-color: #0f2f2e;
+        }
+
+        /* 靛蓝主题（新增）：沉稳现代，Apple systemIndigo 风格 */
+        [data-theme="indigo"] {
+            --primary-bg: #f6f7fb;
+            --secondary-bg: #ffffff;
+            --text-color: #1e2233;
+            --header-color: #5856d6;  /* systemIndigo */
+            --accent-color: #6b6aed;
+            --button-bg: #eceefa;
+            --button-hover-bg: #e3e6f8;
+            --border-color: #dfe2f3;
+            --note-bg: #eef0fb;
+            --note-border: #6b6aed;
+            --code-bg: #f3f4fa;
+            --code-color: #1e2233;
+        }
+
+        /* ==================== 全局样式 ==================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; background: var(--primary-bg); color: var(--text-color); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Microsoft YaHei', 'PingFang SC', sans-serif; overflow: hidden; transition: background-color 0.3s ease, color 0.3s ease; }
+
+        /* ==================== 演示容器 ==================== */
+        #presentation-container { position: relative; width: 100vw; height: 56.25vw; max-height: 100vh; max-width: 177.78vh; margin: auto; top: 50%; transform: translateY(-50%); background: var(--secondary-bg); box-shadow: 0 10px 40px var(--shadow-color); border-radius: 8px; overflow: hidden; transition: all 0.3s ease; }
+
+        /* ==================== 幻灯片基础样式 ==================== */
+        .slide { width: 100%; height: 100%; padding: 3vw; display: none; flex-direction: column; opacity: 0; transition: opacity 0.5s ease-in-out; position: absolute; }
+        .slide.active { display: flex; opacity: 1; z-index: 1; }
+        /* 使内容区域在 Flex 布局中可伸缩并承担滚动 */
+        .slide-content { width: 100%; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding-right: 1vw; }
+        .slide-content::-webkit-scrollbar { width: 8px; }
+        .slide-content::-webkit-scrollbar-track { background: var(--button-bg); border-radius: 4px; }
+        .slide-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        .slide-content::-webkit-scrollbar-thumb:hover { background: var(--button-hover-bg); }
+
+        /* ==================== 文本与标题样式 (应用字体缩放) ==================== */
+        h1, h2, h3 { color: var(--header-color); margin-bottom: 1.5vw; font-weight: 600; line-height: 1.3; }
+        h1 { font-size: calc(3.2vw * var(--font-scale)); border-bottom: 3px solid var(--accent-color); padding-bottom: 1vw; }
+        h2 { font-size: calc(2.5vw * var(--font-scale)); border-bottom: 2px solid var(--accent-color); padding-bottom: 0.8vw; }
+        h3 { font-size: calc(2.0vw * var(--font-scale)); color: var(--text-color); margin-top: 1vw; }
+        p, li { font-size: calc(1.5vw * var(--font-scale)); line-height: 1.8; margin-bottom: 1.2vw; }
+        /* 列表基础间距 */
+        ul, ol { margin: 1vw 0 1vw 2vw; }
+        
+        strong { color: var(--header-color); font-weight: 600; }
+        .text-sm { font-size: calc(1.2vw * var(--font-scale)); }
+        .text-center { text-align: center; }
+        a { color: var(--header-color); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* 标题页布局 (应用字体缩放) */
+        .title-slide { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(135deg, var(--secondary-bg) 0%, var(--primary-bg) 100%); overflow: hidden; }
+        .title-slide h1 { font-size: calc(4vw * var(--font-scale)); border: none; margin-bottom: 2vw; background: linear-gradient(90deg, var(--header-color), var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .title-slide .subtitle { font-size: calc(2vw * var(--font-scale)); color: var(--text-color); opacity: 0.8; margin-bottom: 3vw; }
+        .title-slide .author { font-size: calc(1.8vw * var(--font-scale)); margin-bottom: 0.5vw; }
+        .title-slide .institution { font-size: calc(1.5vw * var(--font-scale)); margin-bottom: 0.5vw; }
+        .title-slide .date { font-size: calc(1.3vw * var(--font-scale)); opacity: 0.6; }
+        
+        /* 布局与组件 (应用字体缩放) */
+        .columns { display: flex; gap: 2vw; width: 100%; align-items: flex-start; }
+        .column { flex: 1; min-width: 0; }
+        .column-45 { flex: 0 0 45%; }
+        .column-55 { flex: 0 0 55%; }
+        figure { margin: 1vw 0; text-align: center; }
+        img { max-width: 100%; max-height: 60vh; height: auto; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow-color); }
+        figcaption { margin-top: 0.8vw; font-size: calc(1.1vw * var(--font-scale)); color: var(--text-color); opacity: 0.7; font-style: italic; }
+        img.clickable { cursor: zoom-in; transition: transform 0.3s, box-shadow 0.3s; }
+        img.clickable:hover { transform: scale(1.02); box-shadow: 0 8px 20px var(--shadow-color); }
+        pre { background: var(--code-bg); color: var(--code-color); padding: 1vw; margin: 1vw 0; border-radius: 6px; font-size: calc(1.1vw * var(--font-scale)); line-height: 1.6; overflow-x: auto; max-height: 45vh; }
+        .note { padding: 1vw 1.2vw; margin-top: 1.5vw; border-radius: 8px; border-left: 4px solid var(--note-border); background: var(--note-bg); font-size: calc(1.3vw * var(--font-scale)); }
+        table { width: 90%; margin: 1.5vw auto; border-collapse: collapse; font-size: calc(1.3vw * var(--font-scale)); box-shadow: 0 2px 8px var(--shadow-color); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 1vw; text-align: center; border-bottom: 1px solid var(--border-color); }
+        th { background: var(--button-bg); color: var(--header-color); font-weight: 600; }
+        tbody tr:nth-child(even) { background-color: var(--primary-bg); }
+        tbody tr:hover { background: var(--button-hover-bg); transition: background 0.3s ease; }
+
+        /* ==================== 图片全屏展示 ==================== */
+        #image-lightbox { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); display: none; align-items: center; justify-content: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease-in-out; padding: 20px; box-sizing: border-box; }
+        #image-lightbox.visible { display: flex; opacity: 1; }
+        #image-lightbox.fit-width { overflow-y: auto; align-items: flex-start; }
+        #lightbox-img { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 0 30px rgba(0,0,0,0.5); border-radius: 8px; }
+        #image-lightbox.fit-width #lightbox-img { width: 100%; max-width: 100%; max-height: none; margin-top: 60px; margin-bottom: 20px; }
+        .lightbox-close, .lightbox-toggle { position: absolute; top: 20px; color: white; background-color: rgba(30, 30, 30, 0.7); border: none; cursor: pointer; border-radius: 5px; padding: 8px 15px; font-family: sans-serif; transition: background-color 0.2s; z-index: 2001; }
+        .lightbox-close:hover, .lightbox-toggle:hover { background-color: rgba(0, 0, 0, 0.9); }
+        .lightbox-close { right: 20px; font-size: 30px; line-height: 1; padding: 5px 15px; }
+        .lightbox-toggle { right: 85px; font-size: 16px; }
+
+        /* ==================== 控制面板 (功能已恢复) ==================== */
+        #controls { position: fixed; bottom: 2vh; left: 50%; transform: translateX(-50%); background: var(--secondary-bg); backdrop-filter: blur(10px); padding: 1vh 2vh; border-radius: 50px; display: flex; align-items: center; gap: 1.5vh; z-index: 1000; box-shadow: 0 4px 20px var(--shadow-color); border: 1px solid var(--border-color); }
+        #controls button { background: var(--button-bg); color: var(--text-color); border: none; padding: 0.8vh 1.2vh; border-radius: 8px; cursor: pointer; font-size: 1.8vh; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; min-width: 3.5vh; height: 3.5vh; }
+        #controls button:hover { background: var(--button-hover-bg); transform: scale(1.1); }
+        #slide-counter { font-size: 1.6vh; font-weight: 500; min-width: 8vh; text-align: center; }
+        #progress-indicator { width: 20vh; height: 0.5vh; background: var(--button-bg); border-radius: 0.25vh; overflow: hidden; }
+        #progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-color), var(--header-color)); transition: width 0.5s ease; }
+        #theme-btn { position: relative; }
+        .theme-menu { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--secondary-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5vh; margin-bottom: 0.5vh; display: none; box-shadow: 0 4px 12px var(--shadow-color); z-index: 1001;}
+        .theme-menu.show { display: block; }
+        .theme-option { padding: 0.5vh 1vh; cursor: pointer; border-radius: 4px; font-size: 1.4vh; white-space: nowrap; }
+        .theme-option:hover { background: var(--button-bg); }
+    </style>
+</head>
+
+<body>
+    <div id="presentation-container">
+        
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div class="slide-content title-slide">
+                <h1>工作进展汇报与文献分享</h1>
+                <p class="subtitle">2025年秋季学期 组会展示</p>
+                <p class="author"><strong>BY2405316 严五金</strong></p>
+                <p class="institution">北京航空航天大学 航空科学与工程学院</p>
+                <p class="date" id="current-date"></p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Work Summary -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>本周工作内容汇报</h1>
+                <ol style="list-style: none; padding-left: 0;">
+                    <li>
+                        <h3>重构 FOS 开源项目代码</h3>
+                        <p>将 FOS (Fast Optical Spectrum) 项目的核心计算部分进行了重构，迁移为基于现代 GPU 架构的加速版本，以提升计算效率。</p>
+                    </li>
+                    <li>
+                        <h3>XLB 框架代码调试与仿真</h3>
+                        <p>对 XLB (differentiable LBM library) 进行了代码调试，成功仿真了二维顶盖驱动方腔（Lid-driven cavity）问题，并对不同雷诺数下的涡结构进行了初步观察与分析。</p>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Slide 3: Paper Intro -->
+        <div class="slide">
+            <div class="slide-content title-slide">
+                <h2 style="font-size: 2.5vw; color: var(--header-color); border: none;">文献分享</h2>
+                <h1 style="font-size: 3.5vw;">XLB: A differentiable massively parallel lattice Boltzmann library in Python</h1>
+                <p class="author text-sm" style="margin-top: 2vw;">Mohammadmehdi Ataei, Hesam Salehipour</p>
+                <p class="date text-sm">Autodesk Research, Toronto, Canada</p>
+                <p class="date text-sm" style="font-style: italic;">Computer Physics Communications 300 (2024) 109187</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Background -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>研究背景与动机</h1>
+                <h3>核心趋势</h3>
+                <p>以 JAX、PyTorch 为代表的<strong>可微编程 (Differentiable Programming)</strong> 框架正从机器学习领域扩展到科学计算，为解决优化、逆问题和物理-机器学习融合提供了强大工具。</p>
+                <h3>现有LBM工具的局限性</h3>
+                <ul>
+                    <li><strong>语言壁垒：</strong>主流高性能LBM库（如 Palabos, OpenLB）多为 C++ 编写，学习曲线陡峭，不利于快速原型设计和研究。</li>
+                    <li><strong>集成困难：</strong>将 C++ 代码与 Python 主流的机器学习生态（JAX, PyTorch）融合，开发统一的计算模型非常具有挑战性。</li>
+                    <li><strong>许可限制：</strong>部分库采用 GPL 等强传染性许可证，限制了其在商业应用中的使用。</li>
+                </ul>
+                <div class="note">
+                    <strong>研究动机：</strong> 开发一个集<strong>易用性、可扩展性、高性能、可微性</strong>于一体的 Python LBM 库，弥合传统高性能计算与现代机器学习生态之间的鸿沟。
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 5: What is XLB? -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>XLB 框架：四大核心特性</h1>
+                <div class="columns">
+                    <div class="column">
+                        <ol>
+                            <li>
+                                <strong>易用性 (Accessibility)</strong><br>
+                                基于 Python 和 JAX，提供与 Numpy 相似的接口，极大降低了用户上手门槛。
+                            </li>
+                            <li>
+                                <strong>可扩展性 (Extensibility)</strong><br>
+                                采用面向对象的编程模型，用户可以轻松添加新的边界条件、碰撞模型或多物理场功能。
+                            </li>
+                             <li>
+                                <strong>高性能 (High Performance)</strong><br>
+                                利用 JAX 的 JIT (Just-In-Time) 编译，将 Python 代码转换为高效的机器码，可在 CPU/GPU/TPU 上大规模并行，实现每秒十亿级的格子更新。
+                            </li>
+                            <li>
+                                <strong>可微性 (Differentiability)</strong><br>
+                                与 JAX 的自动微分和机器学习生态无缝集成，天然适用于基于物理的机器学习、优化和逆问题求解。
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="column">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d36mg6f7aajc738v30eg_2.jpg?x=892&y=469&w=753&h=384&r=0" alt="Sharding Strategy" class="clickable"/>
+                            <figcaption>Fig. 2. XLB 采用的数组分片策略，可将计算负载高效分配到多个设备。</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: LBM Basics -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>核心方法：格子玻尔兹曼方法 (LBM)</h1>
+                <p>LBM 通过求解一组离散的分布函数 $f_i(\mathbf{x}, t)$ 的演化来模拟流体，其核心算法分为两步：</p>
+                <p style="text-align: center; font-size: calc(1.8vw * var(--font-scale));">
+                    <strong>碰撞 (Collision):</strong> $f_i^*(\mathbf{x}, t) = \mathcal{C}(f_i(\mathbf{x}, t))$<br>
+                    <strong>迁移 (Streaming):</strong> $f_i(\mathbf{x} + \Delta\mathbf{x}, t + \Delta t) = f_i^*(\mathbf{x}, t)$
+                </p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d36mg6f7aajc738v30eg_2.jpg?x=325&y=143&w=1095&h=252&r=0" alt="Lattice Structures" class="clickable"/>
+                    <figcaption>Fig. 1. XLB 中支持的 D2Q9, D3Q19, D3Q27 格子模型。</figcaption>
+                </figure>
+                <p>宏观物理量（密度 $\rho$, 速度 $\mathbf{u}$）可通过对分布函数求矩得到，例如：</p>
+                <p style="text-align: center; font-size: calc(1.8vw * var(--font-scale));">
+                    $\rho(\mathbf{x},t) = \sum_i f_i(\mathbf{x}, t)$ &nbsp;&nbsp;&nbsp;&nbsp;
+                    $\mathbf{u}(\mathbf{x},t) = \frac{1}{\rho}\sum_i \mathbf{c}_i f_i(\mathbf{x}, t)$
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 7: Distributed Computing -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>核心实现：基于 JAX 的分布式计算</h1>
+                <p>LBM 中唯一的非局部操作是<strong>迁移 (Streaming)</strong>，在多设备上需要特别处理通信。</p>
+                <div class="columns">
+                    <div class="column column-45">
+                        <h3>通信策略</h3>
+                        <ul>
+                            <li><strong>设备内迁移:</strong> 使用 `jnp.roll` 高效地在单个设备子域内移动数据，实现周期性边界。</li>
+                            <li><strong>跨设备通信:</strong>
+                                <ul>
+                                    <li>`jnp.roll` 无法自动处理跨设备的数据移动。</li>
+                                    <li>XLB 使用 JAX 的 `lax.ppermute` 函数在相邻设备间显式地交换边界数据（切片）。</li>
+                                    <li>这种方法避免了传统方法中设置“幽灵细胞”(halo cells) 的复杂性。</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="column column-55">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d36mg6f7aajc738v30eg_4.jpg?x=383&y=134&w=985&h=1125&r=0" alt="Distributed Streaming" class="clickable"/>
+                            <figcaption>Fig. 3. 分布式计算中的迁移操作，展示了设备间的数据通信。</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Benchmark 1 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>基准测试 1：2D 泰勒-格林涡</h1>
+                <p>该算例用于验证 XLB 在周期性边界条件下的<strong>数值精度和收敛阶</strong>。通过与解析解对比，评估不同碰撞模型和计算精度下的误差。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d36mg6f7aajc738v30eg_6.jpg?x=308&y=139&w=1134&h=854&r=0" alt="Taylor-Green Vortex Results" class="clickable"/>
+                    <figcaption>Fig. 5. 速度场($\epsilon_u$)和密度场($\epsilon_\rho$)的L2误差随网格分辨率N的变化。</figcaption>
+                </figure>
+                <div class="note">
+                    <strong>结论：</strong> 在双精度 (f64/f64) 计算下，BGK 和 KBC 碰撞模型均能达到预期的<strong>二阶收敛精度</strong>。降低存储或计算精度会导致在高分辨率下误差累积，精度下降。
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 9: Benchmark 2 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>基准测试 2：3D 顶盖驱动方腔流</h1>
+                <p>该算例用于验证 XLB 在处理稳态、非稳态和湍流问题（$Re=1000, 3200, 10000$）时的可靠性，尤其是在存在非周期性边界（固壁）的情况下。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d36mg6f7aajc738v30eg_7.jpg?x=103&y=141&w=1543&h=523&r=0" alt="Lid-driven Cavity Results" class="clickable" style="max-height: 50vh;"/>
+                    <figcaption>Fig. 6. 不同雷诺数下，中心截面速度分布与文献参考数据的对比。</figcaption>
+                </figure>
+                 <div class="note">
+                    <strong>结论：</strong> XLB 的模拟结果与文献中的数值模拟及实验数据（彩色圆点）<strong>高度吻合</strong>，证明了其在多种流态下的准确性。
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 10: Performance Scaling -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>性能测试：多 GPU 与分布式扩展</h1>
+                <p>在NVIDIA DGX A100节点上评估 XLB 的并行扩展能力。</p>
+                <div class="columns">
+                    <div class="column">
+                        <h3>强扩展 (Strong Scaling)</h3>
+                        <p>固定问题规模 ($512^3$)，增加GPU数量。在8卡上仍保持近 <strong>90%</strong> 的并行效率。</p>
+                         <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d36mg6f7aajc738v30eg_10.jpg?x=186&y=140&w=1379&h=684&r=0" alt="Strong Scaling" class="clickable" style="max-height: 40vh;"/>
+                            <figcaption>Fig. 11. 单节点强扩展性能。</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <h3>分布式弱扩展</h3>
+                        <p>扩展至64个节点 (<strong>512块GPU</strong>)，问题规模最大达到 $4096^3$（超670亿网格）。</p>
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d36mg6f7aajc738v30eg_10.jpg?x=185&y=899&w=1380&h=680&r=0" alt="Distributed Scaling" class="clickable" style="max-height: 40vh;"/>
+                            <figcaption>Fig. 12. 分布式弱扩展性能。</figcaption>
+                        </figure>
+                    </div>
+                </div>
+                <p class="text-center">在512块GPU上，性能达到 <strong>220,332 MLUPS</strong> (每秒百万格子更新)。大规模下通信开销成为瓶颈。</p>
+            </div>
+        </div>
+
+        <!-- Slide 11: Application 1 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>应用 1：基于深度学习的粗网格仿真修正</h1>
+                <p>展示 XLB 的可微特性。训练一个神经网络作为<strong>修正力项</strong>，添加到低分辨率的粗网格仿真中，使其结果逼近高分辨率的参考解。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d36mg6f7aajc738v30eg_11.jpg?x=194&y=141&w=1359&h=567&r=0" alt="ML Corrector" class="clickable" style="max-height: 45vh;"/>
+                    <figcaption>Fig. 13. 添加(上方)与未添加(下方)修正器时，仿真速度场误差随时间的变化。</figcaption>
+                </figure>
+                <div class="note">
+                    <strong>核心思想：</strong>损失函数建立在未来多个时间步的误差之上。由于整个 LBM 求解过程是可微的，梯度可以沿时间反向传播，使网络学会预测并补偿未来误差。结果显示，修正器显著降低了仿真误差。
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 12: Application 2 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>应用 2：基于可微仿真的流场控制</h1>
+                <p>求解一个<strong>逆问题</strong>：寻找一个合适的初始密度场，使其在经过200个LBM时间步的非线性演化后，能够在流场中形成一个预设的 "XLB" 字母图案。</p>
+                 <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d36mg6f7aajc738v30eg_12.jpg?x=102&y=136&w=1551&h=460&r=0" alt="Flow Control" class="clickable" style="max-height: 40vh;"/>
+                    <figcaption>Fig. 14. 优化得到的初始密度场（左）、目标图案（中）和200步后最终形成的密度场（右）。</figcaption>
+                </figure>
+                <div class="note">
+                    <strong>核心方法：</strong>将最终密度场与目标图案的差异作为损失函数，通过 XLB 的自动微分功能反向传播梯度，直接优化神经网络生成的初始条件。这展示了可微仿真在复杂控制和设计问题中的巨大潜力。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Conclusion -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结论</h1>
+                <div class="columns">
+                    <div class="column">
+                        <h3>主要贡献</h3>
+                        <ul>
+                            <li><strong>降低门槛：</strong>提供了一个基于 Python 的高性能、可扩展、用户友好的 LBM 库。</li>
+                            <li><strong>连接未来：</strong>通过 JAX 实现了<strong>完全可微</strong>，无缝连接了传统 CFD 仿真与现代机器学习工作流。</li>
+                            <li><strong>性能卓越：</strong>展示了在多 GPU 和大规模分布式系统上的高效扩展能力。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>价值与展望</h3>
+                        <ul>
+                            <li>为物理-机器学习、流体优化、逆问题等前沿研究提供了强大的开源工具。</li>
+                            <li>未来计划：支持自适应网格、核函数后端（如 Warp）以追求极致性能、伴随法优化等。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="note" style="text-align: center; margin-top: 2vw;">
+                    <strong>开源项目地址:</strong> <a href="https://github.com/Autodesk/XLB" target="_blank" rel="noopener noreferrer">github.com/Autodesk/XLB</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Q&A -->
+        <div class="slide">
+            <div class="slide-content title-slide">
+                <h1>感谢聆听</h1>
+                <p class="subtitle" style="margin-top: 3vw;">问答环节 (Q&A)</p>
+            </div>
+        </div>
+        
+        <!-- Image Lightbox -->
+        <div id="image-lightbox">
+            <span class="lightbox-close" title="关闭 (Esc)">×</span>
+            <button class="lightbox-toggle" title="切换视图模式"></button>
+            <img src="" alt="全屏视图" id="lightbox-img">
+        </div>
+
+    </div>
+
+    <!-- [恢复] 完整的控制面板 -->
+    <div id="controls">
+        <button id="prev-btn" title="上一页 (←)">◀</button>
+        <button id="first-btn" title="第一页 (Home)">⏮</button>
+        <span id="slide-counter">1 / 14</span>
+        <button id="last-btn" title="最后一页 (End)">⏭</button>
+        <button id="next-btn" title="下一页 (→)">▶</button>
+        <div id="progress-indicator"><div id="progress-bar"></div></div>
+        <button id="goto-btn" title="跳转 (G)">🔢</button>
+        <button id="font-dec-btn" title="减小字号">A-</button>
+        <button id="font-inc-btn" title="增大字号">A+</button>
+        <button id="theme-btn" title="切换主题">🎨
+            <div class="theme-menu" id="theme-menu">
+                <div class="theme-option" data-theme="default">专业蓝</div>
+                <div class="theme-option" data-theme="dark">深色</div>
+                <div class="theme-option" data-theme="green">清新绿</div>
+                <div class="theme-option" data-theme="mint">薄荷青</div>
+                <div class="theme-option" data-theme="indigo">靛蓝</div>
+            </div>
+        </button>
+        <button id="fullscreen-btn" title="全屏 (F)">⛶</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // [恢复] 动态设置日期
+            function setDynamicDate() {
+                const dateElement = document.getElementById('current-date');
+                if (dateElement) {
+                    const today = new Date();
+                    dateElement.textContent = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+                }
+            }
+            setDynamicDate();
+
+            // [恢复] 获取所有需要的元素
+            const presentationContainer = document.getElementById('presentation-container');
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            const controls = {
+                prev: document.getElementById('prev-btn'),
+                next: document.getElementById('next-btn'),
+                first: document.getElementById('first-btn'),
+                last: document.getElementById('last-btn'),
+                goto: document.getElementById('goto-btn'),
+                fontDec: document.getElementById('font-dec-btn'),
+                fontInc: document.getElementById('font-inc-btn'),
+                theme: document.getElementById('theme-btn'),
+                themeMenu: document.getElementById('theme-menu'),
+                fullscreen: document.getElementById('fullscreen-btn'),
+                counter: document.getElementById('slide-counter'),
+                progressBar: document.getElementById('progress-bar')
+            };
+
+            let currentSlide = 0;
+            let fontScale = 1.0;
+
+            // [恢复] 字体缩放功能
+            function updateFontScale() {
+                presentationContainer.style.setProperty('--font-scale', fontScale);
+            }
+            controls.fontInc.addEventListener('click', () => {
+                fontScale = Math.min(1.5, fontScale + 0.1);
+                updateFontScale();
+            });
+            controls.fontDec.addEventListener('click', () => {
+                fontScale = Math.max(0.7, fontScale - 0.1);
+                updateFontScale();
+            });
+
+            // [恢复] 主题切换功能
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('presentation-theme', theme);
+                controls.themeMenu.classList.remove('show');
+            }
+            controls.theme.addEventListener('click', (e) => { e.stopPropagation(); controls.themeMenu.classList.toggle('show'); });
+            document.addEventListener('click', () => controls.themeMenu.classList.remove('show'));
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', (e) => { e.stopPropagation(); setTheme(option.dataset.theme); });
+            });
+
+            // [恢复] 全屏功能
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    presentationContainer.requestFullscreen().catch(err => console.error(`Fullscreen error: ${err.message}`));
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            controls.fullscreen.addEventListener('click', toggleFullscreen);
+
+            // 幻灯片导航
+            function showSlide(index) {
+                if (index < 0 || index >= totalSlides) return;
+                slides.forEach((s, i) => s.classList.toggle('active', i === index));
+                currentSlide = index;
+                controls.counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                controls.progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+                if (window.MathJax && window.MathJax.typeset) {
+                    MathJax.typesetPromise([slides[index]]).catch(err => console.error('MathJax error:', err));
+                }
+            }
+            
+            const slideActions = {
+                next: () => showSlide(currentSlide + 1),
+                prev: () => showSlide(currentSlide - 1),
+                first: () => showSlide(0),
+                last: () => showSlide(totalSlides - 1),
+                goto: () => {
+                    const numStr = prompt(`跳转到第几页? (1-${totalSlides})`);
+                    if (numStr) {
+                        const num = parseInt(numStr, 10) - 1;
+                        if (!isNaN(num) && num >= 0 && num < totalSlides) showSlide(num);
+                    }
+                }
+            };
+            controls.next.addEventListener('click', slideActions.next);
+            controls.prev.addEventListener('click', slideActions.prev);
+            controls.first.addEventListener('click', slideActions.first);
+            controls.last.addEventListener('click', slideActions.last);
+            controls.goto.addEventListener('click', slideActions.goto);
+
+            // 图片灯箱功能
+            const lightbox = document.getElementById('image-lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxClose = lightbox.querySelector('.lightbox-close');
+            const lightboxToggle = lightbox.querySelector('.lightbox-toggle');
+            function openLightbox(src) {
+                lightboxImg.src = src;
+                lightbox.classList.remove('fit-width');
+                lightboxToggle.textContent = '⤢ 适应宽度';
+                lightbox.classList.add('visible');
+            }
+            function closeLightbox() { lightbox.classList.remove('visible'); }
+            document.querySelectorAll('img.clickable').forEach(img => img.addEventListener('click', (e) => { e.stopPropagation(); openLightbox(img.src); }));
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => (e.target === lightbox) && closeLightbox());
+            lightboxToggle.addEventListener('click', () => {
+                const isFitWidth = lightbox.classList.toggle('fit-width');
+                lightboxToggle.textContent = isFitWidth ? '↔ 适应屏幕' : '⤢ 适应宽度';
+            });
+
+            // [恢复] 完整的键盘事件监听
+            document.addEventListener('keydown', (e) => {
+                if (lightbox.classList.contains('visible')) {
+                    if (e.key === 'Escape') closeLightbox();
+                    return;
+                }
+                switch(e.key) {
+                    case 'ArrowRight': case ' ': e.preventDefault(); slideActions.next(); break;
+                    case 'ArrowLeft': e.preventDefault(); slideActions.prev(); break;
+                    case 'Home': e.preventDefault(); slideActions.first(); break;
+                    case 'End': e.preventDefault(); slideActions.last(); break;
+                    case 'f': case 'F': e.preventDefault(); toggleFullscreen(); break;
+                    case 'g': case 'G': e.preventDefault(); slideActions.goto(); break;
+                    case 'Escape': if (document.fullscreenElement) document.exitFullscreen(); break;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+                    e.preventDefault();
+                    controls.fontInc.click();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+                    e.preventDefault();
+                    controls.fontDec.click();
+                }
+            });
+            
+            // 初始化
+            const savedTheme = localStorage.getItem('presentation-theme') || 'default';
+            setTheme(savedTheme);
+            showSlide(0);
+        });
+    </script>
+</body>
+</html>

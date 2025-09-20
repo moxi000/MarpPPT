@@ -11,5 +11,8 @@
 "pasteImage.insertPattern": "![${imageFileName}](${imageFilePath}${imageSyntaxSuffix}",
 "markdown.marp.pptx.editable": "on",
 "markdown.marp.strictPathResolutionDuringExport": true,
-"markdown.marp.browser": "chrome"
+"markdown.marp.browser": "chrome",
+"files.exclude": {
+  "**/.git": false
+}
 }

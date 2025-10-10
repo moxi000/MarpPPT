@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组会汇报 - 机器学习在导热预测中的应用</title>
+
+    <!-- MathJax 配置 - 支持数学公式 -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+        </script>
+
+    <style>
+        /* ==================== 主题变量 ==================== */
+        :root {
+            /* 默认主题 - 专业蓝 */
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --text-color: #2c3e50;
+            --header-color: #2563eb;
+            --accent-color: #3b82f6;
+            --button-bg: #e5e7eb;
+            --button-hover-bg: #d1d5db;
+            --border-color: #d1d5db;
+            --note-bg: #eff6ff;
+            --note-border: #3b82f6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --code-bg: #f3f4f6;
+            --code-color: #1f2937;
+            /* [新增] 字体缩放变量 */
+            --font-scale: 1.0;
+        }
+
+        /* 深色主题 */
+        [data-theme="dark"] {
+            --primary-bg: #1a1a1a;
+            --secondary-bg: #262626;
+            --text-color: #e5e5e5;
+            --header-color: #60a5fa;
+            --accent-color: #3b82f6;
+            --button-bg: #404040;
+            --button-hover-bg: #525252;
+            --border-color: #404040;
+            --note-bg: #1e3a5f;
+            --note-border: #60a5fa;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --code-bg: #374151;
+            --code-color: #f3f4f6;
+        }
+
+        /* 绿色主题（优化：更清新、苹果风） */
+        [data-theme="green"] {
+            --primary-bg: #f6fbf7;
+            /* 柔和浅绿底 */
+            --secondary-bg: #ffffff;
+            --text-color: #0f2e1d;
+            /* 深绿偏中性文字 */
+            --header-color: #2ec866;
+            /* 系统绿风格 */
+            --accent-color: #34c759;
+            /* Apple systemGreen */
+            --button-bg: #e8f5ea;
+            /* 轻浅按钮背景 */
+            --button-hover-bg: #dff1e3;
+            --border-color: #d6eadb;
+            /* 柔和边框 */
+            --note-bg: #edf9f0;
+            /* 浅提示底 */
+            --note-border: #34c759;
+            --code-bg: #f1f6f2;
+            --code-color: #0f2e1d;
+        }
+
+        /* 薄荷主题（新增）：清新薄荷青，Apple systemMint 风格） */
+        [data-theme="mint"] {
+            --primary-bg: #f5fbfa;
+            --secondary-bg: #ffffff;
+            --text-color: #0f2f2e;
+            --header-color: #00c7be;
+            /* systemMint */
+            --accent-color: #20dad0;
+            --button-bg: #e6f7f5;
+            --button-hover-bg: #d7f2ef;
+            --border-color: #cde9e6;
+            --note-bg: #edfafa;
+            --note-border: #00c7be;
+            --code-bg: #eef7f6;
+            --code-color: #0f2f2e;
+        }
+
+        /* 靛蓝主题（新增）：沉稳现代，Apple systemIndigo 风格 */
+        [data-theme="indigo"] {
+            --primary-bg: #f6f7fb;
+            --secondary-bg: #ffffff;
+            --text-color: #1e2233;
+            --header-color: #5856d6;
+            /* systemIndigo */
+            --accent-color: #6b6aed;
+            --button-bg: #eceefa;
+            --button-hover-bg: #e3e6f8;
+            --border-color: #dfe2f3;
+            --note-bg: #eef0fb;
+            --note-border: #6b6aed;
+            --code-bg: #f3f4fa;
+            --code-color: #1e2233;
+        }
+
+        /* ==================== 全局样式 ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background: var(--primary-bg);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* ==================== 演示容器 ==================== */
+        #presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 56.25vw;
+            max-height: 100vh;
+            max-width: 177.78vh;
+            margin: auto;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--secondary-bg);
+            box-shadow: 0 10px 40px var(--shadow-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* ==================== 幻灯片基础样式 ==================== */
+        .slide {
+            width: 100%;
+            height: 100%;
+            padding: 3vw;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            position: absolute;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            z-index: 1;
+        }
+
+        /* 使内容区域在 Flex 布局中可伸缩并承担滚动 */
+        .slide-content {
+            width: 100%;
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 1vw;
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: var(--button-bg);
+            border-radius: 4px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background: var(--button-hover-bg);
+        }
+
+        /* ==================== 文本与标题样式 (应用字体缩放) ==================== */
+        h1,
+        h2,
+        h3 {
+            color: var(--header-color);
+            margin-bottom: 1.5vw;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        h1 {
+            font-size: calc(3.2vw * var(--font-scale));
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 1vw;
+        }
+
+        h2 {
+            font-size: calc(2.5vw * var(--font-scale));
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.8vw;
+        }
+
+        h3 {
+            font-size: calc(2.0vw * var(--font-scale));
+            color: var(--text-color);
+            margin-top: 1vw;
+        }
+
+        p,
+        li {
+            font-size: calc(1.5vw * var(--font-scale));
+            line-height: 1.8;
+            margin-bottom: 1.2vw;
+        }
+
+        /* 列表基础间距 */
+        ul,
+        ol {
+            margin: 1vw 0 1vw 2vw;
+        }
+
+        strong {
+            color: var(--header-color);
+            font-weight: 600;
+        }
+
+        .text-sm {
+            font-size: calc(1.2vw * var(--font-scale));
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        a {
+            color: var(--header-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* 标题页布局 (应用字体缩放) */
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, var(--secondary-bg) 0%, var(--primary-bg) 100%);
+            overflow: hidden;
+        }
+
+        .title-slide h1 {
+            font-size: calc(4vw * var(--font-scale));
+            border: none;
+            margin-bottom: 2vw;
+            background: linear-gradient(90deg, var(--header-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .title-slide .subtitle {
+            font-size: calc(2vw * var(--font-scale));
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 3vw;
+        }
+
+        .title-slide .author {
+            font-size: calc(1.8vw * var(--font-scale));
+            margin-bottom: 0.5vw;
+        }
+
+        .title-slide .institution {
+            font-size: calc(1.5vw * var(--font-scale));
+            margin-bottom: 0.5vw;
+        }
+
+        .title-slide .date {
+            font-size: calc(1.3vw * var(--font-scale));
+            opacity: 0.6;
+        }
+
+        /* 布局与组件 (应用字体缩放) */
+        .columns {
+            display: flex;
+            gap: 2vw;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .column-45 {
+            flex: 0 0 45%;
+        }
+
+        .column-55 {
+            flex: 0 0 55%;
+        }
+
+        figure {
+            margin: 1vw 0;
+            text-align: center;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 60vh;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        figcaption {
+            margin-top: 0.8vw;
+            font-size: calc(1.1vw * var(--font-scale));
+            color: var(--text-color);
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        img.clickable {
+            cursor: zoom-in;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        img.clickable:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px var(--shadow-color);
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-color);
+            padding: 1vw;
+            margin: 1vw 0;
+            border-radius: 6px;
+            font-size: calc(1.1vw * var(--font-scale));
+            line-height: 1.6;
+            overflow-x: auto;
+            max-height: 45vh;
+        }
+
+        .note {
+            padding: 1vw 1.2vw;
+            margin-top: 1.5vw;
+            border-radius: 8px;
+            border-left: 4px solid var(--note-border);
+            background: var(--note-bg);
+            font-size: calc(1.3vw * var(--font-scale));
+        }
+
+        table {
+            width: 90%;
+            margin: 1.5vw auto;
+            border-collapse: collapse;
+            font-size: calc(1.3vw * var(--font-scale));
+            box-shadow: 0 2px 8px var(--shadow-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 1vw;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--button-bg);
+            color: var(--header-color);
+            font-weight: 600;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--primary-bg);
+        }
+
+        tbody tr:hover {
+            background: var(--button-hover-bg);
+            transition: background 0.3s ease;
+        }
+
+        /* ==================== 图片全屏展示 ==================== */
+        #image-lightbox {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #image-lightbox.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        #image-lightbox.fit-width {
+            overflow-y: auto;
+            align-items: flex-start;
+        }
+
+        #lightbox-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+
+        #image-lightbox.fit-width #lightbox-img {
+            width: 100%;
+            max-width: 100%;
+            max-height: none;
+            margin-top: 60px;
+            margin-bottom: 20px;
+        }
+
+        .lightbox-close,
+        .lightbox-toggle {
+            position: absolute;
+            top: 20px;
+            color: white;
+            background-color: rgba(30, 30, 30, 0.7);
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-family: sans-serif;
+            transition: background-color 0.2s;
+            z-index: 2001;
+        }
+
+        .lightbox-close:hover,
+        .lightbox-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .lightbox-close {
+            right: 20px;
+            font-size: 30px;
+            line-height: 1;
+            padding: 5px 15px;
+        }
+
+        .lightbox-toggle {
+            right: 85px;
+            font-size: 16px;
+        }
+
+        /* ==================== 控制面板 (功能已恢复) ==================== */
+        #controls {
+            position: fixed;
+            bottom: 2vh;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--secondary-bg);
+            backdrop-filter: blur(10px);
+            padding: 1vh 2vh;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 1.5vh;
+            z-index: 1000;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+
+        #controls button {
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8vh 1.2vh;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.8vh;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 3.5vh;
+            height: 3.5vh;
+        }
+
+        #controls button:hover {
+            background: var(--button-hover-bg);
+            transform: scale(1.1);
+        }
+
+        #slide-counter {
+            font-size: 1.6vh;
+            font-weight: 500;
+            min-width: 8vh;
+            text-align: center;
+        }
+
+        #progress-indicator {
+            width: 20vh;
+            height: 0.5vh;
+            background: var(--button-bg);
+            border-radius: 0.25vh;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--header-color));
+            transition: width 0.5s ease;
+        }
+
+        #theme-btn {
+            position: relative;
+        }
+
+        .theme-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5vh;
+            margin-bottom: 0.5vh;
+            display: none;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            z-index: 1001;
+        }
+
+        .theme-menu.show {
+            display: block;
+        }
+
+        .theme-option {
+            padding: 0.5vh 1vh;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1.4vh;
+            white-space: nowrap;
+        }
+
+        .theme-option:hover {
+            background: var(--button-bg);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="presentation-container">
+
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div class="slide-content title-slide">
+                <h1>工作进展汇报与文献分享</h1>
+                <p class="subtitle">2025年秋季学期 组会展示</p>
+                <p class="author"><strong>BY2405316 严五金</strong></p>
+                <p class="institution">北京航空航天大学 航空科学与工程学院</p>
+                <p class="date" id="current-date"></p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Work Summary -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>本周工作内容汇报</h1>
+                <ol style="list-style: none; padding-left: 0;">
+                    <li>
+                        <h3>调试 AP-Hybrid-PINN 代码</h3>
+                        <p>针对先前实验中结果不理想的 AP-Hybrid-PINN 模型，进行了深入的代码调试与参数调整，旨在解决收敛性问题并提升模型精度。</p>
+                    </li>
+                    <li>
+                        <h3>多孔介质热辐射方法学习</h3>
+                        <p>系统学习了多孔介质中热辐射传输的理论模型与数值处理方法，为后续耦合仿真研究打下理论基础。</p>
+                    </li>
+                    <li>
+                        <h3>LBM 与智能算法结合的可行性分析</h3>
+                        <p>完成了格子玻尔兹曼方法（LBM）与机器学习/深度学习算法结合的技术路线可行性分析，并对当前的研究现状进行了全面的文献调研。</p>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Slide 3: Paper Intro -->
+        <div class="slide">
+            <div class="slide-content title-slide">
+                <h2 style="font-size: 2.5vw; color: var(--header-color); border: none;">文献分享</h2>
+                <h1 style="font-size: 3.2vw;">Predicting the effective thermal conductivities of composite materials and
+                    porous media by machine learning methods</h1>
+                <p class="author text-sm" style="margin-top: 2vw;">Han Wei, Shuaishuai Zhao, Qingyuan Rong, Hua Bao</p>
+                <p class="date text-sm">Shanghai Jiao Tong University</p>
+                <p class="date text-sm" style="font-style: italic;">International Journal of Heat and Mass Transfer 127
+                    (2018) 908-916</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Background -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>研究背景：一个两难的困境</h1>
+                <p>预测复合材料的有效导热系数 ($k_{eff}$) 是一个经典的工程问题。现有方法主要分为两类：</p>
+                <div class="columns">
+                    <div class="column">
+                        <h3>物理模型方法</h3>
+                        <ul>
+                            <li><strong>有效介质理论 (EMT):</strong>
+                                <br>如 Maxwell, Bruggeman 模型。
+                            <li><strong>优点:</strong> 简单，计算快（解析公式）。</li>
+                            <li><strong>缺点:</strong> <strong>精度有限</strong>，忽略了颗粒的具体分布（微观结构）。</li>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>数值模拟方法</h3>
+                        <ul>
+                            <li><strong>直接求解PDE:</strong>
+                                <br>如 FEM, FVM, LBM。
+                            <li><strong>优点:</strong> <strong>精度高</strong>，能考虑复杂的微观结构。</li>
+                            <li><strong>缺点:</strong> <strong>计算成本极高</strong>，耗时巨大。</li>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="note">
+                    <strong>核心矛盾：</strong>
+                    我们能否找到一种方法，既能拥有接近数值模拟的<strong>高精度</strong>，又能实现媲美解析模型的<strong>高效率</strong>？这正是本文引入机器学习的动机。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: The ML Approach -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>新思路：机器学习作为“代理模型”</h1>
+                <p>本文提出一种全新的、数据驱动的范式：训练机器学习模型来学习“结构”与“导热系数”之间的复杂映射关系。</p>
+                <h3>两种不同的学习策略</h3>
+                <div class="columns">
+                    <div class="column">
+                        <h4>1. 基于“描述符”的回归</h4>
+                        <p><strong>输入:</strong> 几个关键的宏观物理参数（“描述符”），如：</p>
+                        <ul>
+                            <li>基体导热系数 ($k_1$)</li>
+                            <li>夹杂物导热系数 ($k_2$)</li>
+                            <li>夹杂物体积分数 ($v_2$)</li>
+                        </ul>
+                        <p><strong>模型:</strong> 支持向量回归 (<strong>SVR</strong>), 高斯过程回归 (<strong>GPR</strong>)</p>
+                    </div>
+                    <div class="column">
+                        <h4>2. 基于“图像”的回归</h4>
+                        <p><strong>输入:</strong> 整个材料的<strong>微观结构图像</strong>本身。</p>
+                        <p>这种方法不依赖于手动提取特征，而是让模型自己从图像中学习哪些结构特征是重要的。</p>
+                        <p><strong>模型:</strong> 卷积神经网络 (<strong>CNN</strong>)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Data Generation -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>方法论：如何获取训练数据？</h1>
+                <p>机器学习的基础是数据。本文通过“数值实验”的方式，自建了一个高质量的数据集。</p>
+                <ol>
+                    <li>
+                        <strong>生成结构 (QSGS):</strong> 使用 Quartet Structure Generation Set 方法生成了大量具有不同体积分数的随机各向同性微观结构。
+                    </li>
+                    <li>
+                        <strong>计算“真值” (LBM):</strong> 对每一个生成的结构，使用高精度的格子玻尔兹曼方法 (LBM) 计算其有效导热系数
+                        $k_{eff}$。这个结果被当作训练时的“正确答案”。
+                    </li>
+                </ol>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d3kgtt3ef24c73cukfrg_4.jpg?x=311&y=190&w=1102&h=873&r=0"
+                        alt="Generated Structures" class="clickable" style="max-height: 45vh;" />
+                    <figcaption>Fig. 2. 使用 QSGS 生成的不同体积分数的复合材料微观结构。</figcaption>
+                </figure>
+                <p class="text-center">整个流程可以概括为：<strong>QSGS (出题) $\rightarrow$ LBM (做题) $\rightarrow$ ML
+                        (学习解题思路)</strong></p>
+            </div>
+        </div>
+
+        <!-- Slide 7: QSGS Overview -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>QSGS：统计重建多孔结构的“迷你工厂”</h1>
+                <p>Quartet Structure Generation Set（QSGS）最早用于油藏岩心重建，可通过概率规则快速生成具有目标孔隙率和空间相关性的随机结构。</p>
+                <ol>
+                    <li><strong>随机播种核心：</strong> 在二维网格上随机放置“核心”单元，核心出现的概率由 $c_d$ 控制。本文选取 $c_d = 0.01$。</li>
+                    <li><strong>定向概率生长：</strong> 核心按照 ${D_i}$ 指定的方向生长（共 8 个方向 + 自身），$D_i = 0.1$ 保证各向同性；调整 ${D_i}$ 即可获得各向异性结构。</li>
+                    <li><strong>相变终止：</strong> 当目标相的体积分数 $p$ 达到预设值时停止迭代，得到具有真实孔径分布和连通性的复合材料/多孔介质。</li>
+                </ol>
+                <div class="note">
+                    <strong>为什么选 QSGS？</strong> 该方法兼具物理真实性与可控性，能复刻“核—枝—团簇”式的演化过程，比完全随机填充更接近实际烧结、沉积等成因。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: LBM Setup -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>LBM 计算设置：确保“真值”可信</h1>
+                <ul>
+                    <li><strong>模型选择：</strong> 使用 D2Q9 能量格子玻尔兹曼模型，对温度分布的演化方程进行显式推进。</li>
+                    <li><strong>平衡分布：</strong> 采用文中式(11)的 $g_\alpha^{eq}$，分别处理静止、正交与对角速度方向，保证宏观上恢复热扩散方程。</li>
+                    <li><strong>松弛参数：</strong> 基体与夹杂的弛豫时间由式(12)-(13)确定，统一设定 $\left(\rho c_p\right)_m = \left(\rho c_p\right)_i = 10^4$，$\delta t = 0.01$，$c=1$。</li>
+                    <li><strong>边界条件：</strong> 结构采用周期边界，温差控制为 10 K，可有效消除有限尺度效应。</li>
+                    <li><strong>计算代价：</strong> 在个人笔记本上求解单个样本约需 30 分钟，是构建机器学习“真值库”的主要时间开销。</li>
+                </ul>
+                <div class="note">
+                    <strong>结论：</strong> LBM 给出的 $k_{eff}$ 被视作“准确标签”，其物理一致性为后续机器学习模型提供坚实基准。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Dataset Summary -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>数据集配置与划分</h1>
+                <p>针对不同模型，作者构建了分层的数据集，兼顾材料类型、导热比和体积分数的多样性。</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>模型</th>
+                            <th>样本总量</th>
+                            <th>输入形式</th>
+                            <th>训练 / 验证 / 测试</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SVR / GPR</td>
+                            <td>约 750 组（体积分数 2%–35%，10 组 $k_1:k_2$ 比例 + 多孔介质 6 组比例）</td>
+                            <td>$(k_1, k_2, v_2)$ 三元描述符</td>
+                            <td>$85\%$（650）用于训练 + 交叉验证，$15\%$（约 100）用于测试</td>
+                        </tr>
+                        <tr>
+                            <td>CNN</td>
+                            <td>1500 幅结构图像（体积分数 2%–30%，每个水平 100 张）</td>
+                            <td>$100 \times 112$ 像素周期结构图</td>
+                            <td>1400（含验证集）/ 100（盲测集），训练 3&times;10<sup>5</sup> 步收敛</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="note">
+                    <strong>多样化覆盖：</strong> 数据集既包含高导热填料的复合材料，也包含低导热孔洞的多孔介质，强化了模型的泛化能力。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: SVR/GPR Pipeline -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>SVR &amp; GPR：从少量描述符中学习</h1>
+                <div class="columns">
+                    <div class="column">
+                        <h3>支持向量回归 (SVR)</h3>
+                        <ul>
+                            <li>采用径向基函数 (RBF) 核：$K(\mathbf{x}, \mathbf{x}_i) = \exp\left(-\gamma\|\mathbf{x}-\mathbf{x}_i\|^2\right)$。</li>
+                            <li>输入特征先线性缩放至 [-1, 1]，再利用 $\varepsilon$-不敏感损失寻找最优间隔。</li>
+                            <li>通过五折交叉验证联调惩罚系数 $C$ 与核宽度 $\gamma$，使用 LibSVM 实现。</li>
+                            <li>在 i5 笔记本上完成一次训练约需 30 分钟，得到的模型可瞬时预测新样本。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>高斯过程回归 (GPR)</h3>
+                        <ul>
+                            <li>假设目标函数服从均值为 0、协方差为 RBF 核的高斯过程，通过超参数 $(\sigma_f, \sigma_l)$ 控制平滑度与波动。</li>
+                            <li>利用 gpml 工具箱最大化对数似然获取超参数，并显式给出预测均值与不确定度。</li>
+                            <li>与 SVR 类似，输入同样标准化，保证不同物理量具有可比尺度。</li>
+                            <li>实验表明模型可外推至未出现的导热比（如 $1:50$），体现了概率建模的稳健性。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="note">
+                    <strong>关键差异：</strong> SVR 追求边界间隔的最优，GPR 直接给出预测分布。两者互补，为后续 CNN 结果提供对照基准。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: SVR/GPR Results -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结果 1：SVR/GPR vs. 传统EMT模型</h1>
+                <p>使用基于“描述符”的 SVR 和 GPR 模型进行预测，并与经典的 Maxwell 和 Bruggeman 模型对比。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d3kgtt3ef24c73cukfrg_5.jpg?x=288&y=703&w=1191&h=532&r=0"
+                        alt="SVR/GPR Error Comparison" class="clickable" style="max-height: 45vh;" />
+                    <figcaption>Fig. 4. 不同模型在多孔介质(a)和复合材料(b)上的预测误差对比。</figcaption>
+                </figure>
+                <div class="note">
+                    <strong>核心发现：</strong> SVR 和 GPR 的预测误差（绿色和紫色点）远小于 EMT
+                    模型（蓝色和橙色点），尤其是在体积分数较高时。这表明即使只使用宏观参数，机器学习模型也能学到比简单物理公式更复杂的非线性关系。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: RMSE Comparison -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>量化对比：均方根误差 (RMSE)</h1>
+                <p>通过计算 RMSE，可以更直观地看出各模型预测的整体精度。</p>
+                <div class="columns">
+                    <div class="column">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d3kgtt3ef24c73cukfrg_6.jpg?x=106&y=188&w=715&h=539&r=0"
+                                alt="Generalization Test" class="clickable" style="max-height: 150vh;" />
+                            <figcaption>Fig. 5. 对训练集中未见过的导热系数比 ($k_1:k_2=1:50$) 进行预测，结果依然准确。</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <table>
+                            <caption>Table 1. 各模型在测试集上的RMSE</caption>
+                            <thead>
+                                <tr>
+                                    <th>模型</th>
+                                    <th>多孔介质 (%)</th>
+                                    <th>复合材料 (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>SVR</td>
+                                    <td>6.11</td>
+                                    <td>5.26</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>GPR</strong></td>
+                                    <td><strong>5.80</strong></td>
+                                    <td><strong>3.98</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Maxwell-Eucken</td>
+                                    <td>32.13</td>
+                                    <td>7.50</td>
+                                </tr>
+                                <tr>
+                                    <td>Bruggeman</td>
+                                    <td>24.12</td>
+                                    <td>37.35</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h3>结果解读</h3>
+                        <ul>
+                            <li>GPR 表现最佳，其误差在所有情况下都显著低于 EMT 模型。</li>
+                            <li>SVR/GPR 模型表现出良好的<strong>泛化能力</strong>，能够准确预测训练时未见过的数据。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: CNN Basics -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>CNN 是什么？</h1>
+                <p>卷积神经网络（Convolutional Neural Network）是一类专门处理网格化数据的深度学习模型，通过局部连接与参数共享高效提取空间特征。</p>
+                <div class="columns">
+                    <div class="column">
+                        <h3>核心机制</h3>
+                        <ul>
+                            <li><strong>卷积核：</strong> 小尺寸滤波器在输入上滑动，感受野逐层扩张，自动发现纹理、边缘与更高阶模式。</li>
+                            <li><strong>参数共享：</strong> 同一卷积核在整幅图像复用，显著降低可训练参数数量，天然具备平移不变性。</li>
+                            <li><strong>非线性激活：</strong> Sigmoid/ReLU 等函数引入非线性，使网络能拟合复杂映射。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>经典网络启发</h3>
+                        <ul>
+                            <li><strong>LeNet-5：</strong> 解决手写数字识别，奠定“卷积+池化+全连接”范式。</li>
+                            <li><strong>AlexNet / ResNet：</strong> 将 CNN 推向大规模视觉任务，验证其捕捉空间结构的强大能力。</li>
+                            <li><strong>本研究：</strong> 将 CNN 拓展到材料微结构领域，把像素理解为不同相的占据情况，从而建立“图像到导热”的映射。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="note">
+                    <strong>为何适配本问题？</strong> 微观结构本质上是二维图像，CNN 可自动学习孔隙连通性、团簇尺寸等高阶特征，无需人工设定描述符。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: CNN Deep Dive -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结果 2：深入微观——CNN 的力量</h1>
+                <p>SVR/GPR 忽略了微观结构，而 CNN 直接将结构图像作为输入，理论上能捕捉到更丰富的信息。</p>
+                <h3>CNN 如何“看图识导热”？</h3>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d3kgtt3ef24c73cukfrg_2.jpg?x=185&y=1556&w=1357&h=500&r=0"
+                        alt="CNN Architecture" class="clickable" style="max-height: 30vh;" />
+                    <figcaption>Fig. 1. 本文使用的 CNN 网络架构示意图。</figcaption>
+                </figure>
+                <ol>
+                    <li><strong>卷积层 (Conv):</strong> 使用多个“滤波器”（卷积核）在图像上滑动，自动提取诸如颗粒边界、聚集区域、连通性等局部结构特征。</li>
+                    <li><strong>池化层 (Pool):</strong> 对特征图进行降采样，保留最显著的特征，同时减少计算量。</li>
+                    <li><strong>全连接层 (FC):</strong> 将前面提取出的高级特征进行组合，最终映射到一个数值——即预测的有效导热系数 $k_{eff}$。</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Slide 15: CNN Results -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>CNN 性能：精度与效率的巅峰</h1>
+                <div class="columns">
+                    <div class="column column-45">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d3kgtt3ef24c73cukfrg_6.jpg?x=897&y=187&w=717&h=547&r=0"
+                                alt="CNN Prediction vs LBM" class="clickable" style="width: 100%; max-height: 30vh; object-fit: contain;" />
+                            <figcaption>Fig. 6. CNN 预测值与 LBM 真值的对比，R²=0.986，高度相关。</figcaption>
+                        </figure>
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d3kgtt3ef24c73cukfrg_6.jpg?x=900&y=949&w=710&h=590&r=0"
+                                alt="CNN Error Comparison" class="clickable" style="width: 100%; max-height: 30vh; object-fit: contain;" />
+                            <figcaption>Fig. 7. CNN 与 EMT 模型的误差对比。</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column column-55">
+                        <h3>惊人的表现</h3>
+                        <ul>
+                            <li><strong>极高精度:</strong> CNN 模型的 RMSE 仅为 <strong>1.9%</strong>，远低于 SVR/GPR (约4-6%)，更是碾压了
+                                EMT 模型 (7.3% 和 18.3%)。这证明了考虑微观结构信息的重要性。</li>
+                            <li><strong>极致效率:</strong> 一旦模型训练完成，预测过程几乎是瞬时的。在普通笔记本电脑上，预测100个新结构的 $k_{eff}$
+                                耗时<strong>不到1秒</strong>，而用LBM计算一个结构则需要半小时。</li>
+                        </ul>
+                        <div class="note">
+                            <strong>结论：</strong> CNN 成功地在精度和效率之间取得了最佳平衡，实现了“又准又快”的目标。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Extended Outlook -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>拓展：机器学习导热研究的新动向</h1>
+                <div class="columns">
+                    <div class="column">
+                        <h3>更多对象与物理</h3>
+                        <ul>
+                            <li><strong>界面热阻预测：</strong> Zhan et al. 利用随机森林、SVR 对双材料界面热阻建模，优于声学/弥散失配模型。</li>
+                            <li><strong>各向异性与多尺度：</strong> 基于图卷积或注意力机制的网络正在处理纤维增强复合材料的方向性导热。</li>
+                            <li><strong>瞬态问题：</strong> 数据驱动的降阶模型可快速评估周期热载荷下的温度响应。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>方法论趋势</h3>
+                        <ul>
+                            <li><strong>物理约束机器学习：</strong> 将守恒方程写入损失函数（PINN、物理正则化）以提升外推可靠性。</li>
+                            <li><strong>多源数据融合：</strong> 结合实验、小样本高保真模拟与大量低保真预测，构建多保真代理模型。</li>
+                            <li><strong>不确定度评估：</strong> 通过贝叶斯神经网络或深度集合，给出置信区间，辅助材料设计风险控制。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="note">
+                    <strong>提示：</strong> 机器学习与物理模型的结合正在从“替代计算”走向“协同设计”，未来可望在复合材料拓扑优化、在线健康监测等场景中发挥作用。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Conclusion -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结论与讨论</h1>
+                <div class="columns">
+                    <div class="column">
+                        <h3>主要贡献</h3>
+                        <ul>
+                            <li>首次系统地证明了多种机器学习方法 (SVR, GPR, CNN) 可作为<strong>快速且准确</strong>的代理模型，用于预测复合材料的有效导热系数。</li>
+                            <li>与传统EMT模型相比，所有测试的ML模型都展现出更高的预测精度。</li>
+                            <li>特别是 CNN，通过直接学习微观结构图像，实现了<strong>精度和效率的统一</strong>，远超传统方法。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>局限与展望</h3>
+                        <ul>
+                            <li><strong>“黑箱”问题:</strong> 机器学习模型的可解释性较差，很难从中直接提炼出清晰的物理规律。</li>
+                            <li><strong>数据依赖性:</strong> 模型的性能强依赖于训练数据的质量和覆盖范围。对于训练集之外的全新结构，预测精度可能下降。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="note" style="margin-top: 2vw;">
+                    <strong>核心价值：</strong>
+                    本文开创性地展示了数据驱动方法在传热学领域的巨大潜力。机器学习方法不是要取代物理建模或实验，而是作为一种强大的<strong>补充工具</strong>，能够在保证精度的前提下，将数小时的计算时间缩短到毫秒级，为材料设计和优化开辟了新的高效路径。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: Q&A -->
+        <div class="slide">
+            <div class="slide-content title-slide">
+                <h1>感谢聆听</h1>
+                <p class="subtitle" style="margin-top: 3vw;">问答环节 (Q&A)</p>
+            </div>
+        </div>
+
+        <!-- Image Lightbox -->
+        <div id="image-lightbox">
+            <span class="lightbox-close" title="关闭 (Esc)">×</span>
+            <button class="lightbox-toggle" title="切换视图模式"></button>
+            <img src="" alt="全屏视图" id="lightbox-img">
+        </div>
+
+    </div>
+
+    <!-- [恢复] 完整的控制面板 -->
+    <div id="controls">
+        <button id="prev-btn" title="上一页 (←)">◀</button>
+        <button id="first-btn" title="第一页 (Home)">⏮</button>
+        <span id="slide-counter">1 / 12</span>
+        <button id="last-btn" title="最后一页 (End)">⏭</button>
+        <button id="next-btn" title="下一页 (→)">▶</button>
+        <div id="progress-indicator">
+            <div id="progress-bar"></div>
+        </div>
+        <button id="goto-btn" title="跳转 (G)">🔢</button>
+        <button id="font-dec-btn" title="减小字号">A-</button>
+        <button id="font-inc-btn" title="增大字号">A+</button>
+        <button id="theme-btn" title="切换主题">🎨
+            <div class="theme-menu" id="theme-menu">
+                <div class="theme-option" data-theme="default">专业蓝</div>
+                <div class="theme-option" data-theme="dark">深色</div>
+                <div class="theme-option" data-theme="green">清新绿</div>
+                <div class="theme-option" data-theme="mint">薄荷青</div>
+                <div class="theme-option" data-theme="indigo">靛蓝</div>
+            </div>
+        </button>
+        <button id="fullscreen-btn" title="全屏 (F)">⛶</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // [恢复] 动态设置日期
+            function setDynamicDate() {
+                const dateElement = document.getElementById('current-date');
+                if (dateElement) {
+                    const today = new Date();
+                    dateElement.textContent = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+                }
+            }
+            setDynamicDate();
+
+            // [恢复] 获取所有需要的元素
+            const presentationContainer = document.getElementById('presentation-container');
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            const controls = {
+                prev: document.getElementById('prev-btn'),
+                next: document.getElementById('next-btn'),
+                first: document.getElementById('first-btn'),
+                last: document.getElementById('last-btn'),
+                goto: document.getElementById('goto-btn'),
+                fontDec: document.getElementById('font-dec-btn'),
+                fontInc: document.getElementById('font-inc-btn'),
+                theme: document.getElementById('theme-btn'),
+                themeMenu: document.getElementById('theme-menu'),
+                fullscreen: document.getElementById('fullscreen-btn'),
+                counter: document.getElementById('slide-counter'),
+                progressBar: document.getElementById('progress-bar')
+            };
+
+            let currentSlide = 0;
+            let fontScale = 1.0;
+
+            // [恢复] 字体缩放功能
+            function updateFontScale() {
+                presentationContainer.style.setProperty('--font-scale', fontScale);
+            }
+            controls.fontInc.addEventListener('click', () => {
+                fontScale = Math.min(1.5, fontScale + 0.1);
+                updateFontScale();
+            });
+            controls.fontDec.addEventListener('click', () => {
+                fontScale = Math.max(0.7, fontScale - 0.1);
+                updateFontScale();
+            });
+
+            // [恢复] 主题切换功能
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('presentation-theme', theme);
+                controls.themeMenu.classList.remove('show');
+            }
+            controls.theme.addEventListener('click', (e) => { e.stopPropagation(); controls.themeMenu.classList.toggle('show'); });
+            document.addEventListener('click', () => controls.themeMenu.classList.remove('show'));
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', (e) => { e.stopPropagation(); setTheme(option.dataset.theme); });
+            });
+
+            // [恢复] 全屏功能
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    presentationContainer.requestFullscreen().catch(err => console.error(`Fullscreen error: ${err.message}`));
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            controls.fullscreen.addEventListener('click', toggleFullscreen);
+
+            // 幻灯片导航
+            function showSlide(index) {
+                if (index < 0 || index >= totalSlides) return;
+                slides.forEach((s, i) => s.classList.toggle('active', i === index));
+                currentSlide = index;
+                controls.counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                controls.progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+                if (window.MathJax && window.MathJax.typeset) {
+                    MathJax.typesetPromise([slides[index]]).catch(err => console.error('MathJax error:', err));
+                }
+            }
+
+            const slideActions = {
+                next: () => showSlide(currentSlide + 1),
+                prev: () => showSlide(currentSlide - 1),
+                first: () => showSlide(0),
+                last: () => showSlide(totalSlides - 1),
+                goto: () => {
+                    const numStr = prompt(`跳转到第几页? (1-${totalSlides})`);
+                    if (numStr) {
+                        const num = parseInt(numStr, 10) - 1;
+                        if (!isNaN(num) && num >= 0 && num < totalSlides) showSlide(num);
+                    }
+                }
+            };
+            controls.next.addEventListener('click', slideActions.next);
+            controls.prev.addEventListener('click', slideActions.prev);
+            controls.first.addEventListener('click', slideActions.first);
+            controls.last.addEventListener('click', slideActions.last);
+            controls.goto.addEventListener('click', slideActions.goto);
+
+            // 图片灯箱功能
+            const lightbox = document.getElementById('image-lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxClose = lightbox.querySelector('.lightbox-close');
+            const lightboxToggle = lightbox.querySelector('.lightbox-toggle');
+            function openLightbox(src) {
+                lightboxImg.src = src;
+                lightbox.classList.remove('fit-width');
+                lightboxToggle.textContent = '⤢ 适应宽度';
+                lightbox.classList.add('visible');
+            }
+            function closeLightbox() { lightbox.classList.remove('visible'); }
+            document.querySelectorAll('img.clickable').forEach(img => img.addEventListener('click', (e) => { e.stopPropagation(); openLightbox(img.src); }));
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => (e.target === lightbox) && closeLightbox());
+            lightboxToggle.addEventListener('click', () => {
+                const isFitWidth = lightbox.classList.toggle('fit-width');
+                lightboxToggle.textContent = isFitWidth ? '↔ 适应屏幕' : '⤢ 适应宽度';
+            });
+
+            // [恢复] 完整的键盘事件监听
+            document.addEventListener('keydown', (e) => {
+                if (lightbox.classList.contains('visible')) {
+                    if (e.key === 'Escape') closeLightbox();
+                    return;
+                }
+                switch (e.key) {
+                    case 'ArrowRight': case ' ': e.preventDefault(); slideActions.next(); break;
+                    case 'ArrowLeft': e.preventDefault(); slideActions.prev(); break;
+                    case 'Home': e.preventDefault(); slideActions.first(); break;
+                    case 'End': e.preventDefault(); slideActions.last(); break;
+                    case 'f': case 'F': e.preventDefault(); toggleFullscreen(); break;
+                    case 'g': case 'G': e.preventDefault(); slideActions.goto(); break;
+                    case 'Escape': if (document.fullscreenElement) document.exitFullscreen(); break;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+                    e.preventDefault();
+                    controls.fontInc.click();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+                    e.preventDefault();
+                    controls.fontDec.click();
+                }
+            });
+
+            // 初始化
+            const savedTheme = localStorage.getItem('presentation-theme') || 'default';
+            setTheme(savedTheme);
+            showSlide(0);
+        });
+    </script>
+</body>
+
+</html>

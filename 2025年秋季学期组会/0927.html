@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>组会汇报 - T-phPINN 学习与工作进展</title>
+
+    <!-- MathJax 配置 - 支持数学公式 -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+        </script>
+
+    <style>
+        /* ==================== 主题变量 ==================== */
+        :root {
+            /* 默认主题 - 专业蓝 */
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --text-color: #2c3e50;
+            --header-color: #2563eb;
+            --accent-color: #3b82f6;
+            --button-bg: #e5e7eb;
+            --button-hover-bg: #d1d5db;
+            --border-color: #d1d5db;
+            --note-bg: #eff6ff;
+            --note-border: #3b82f6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --code-bg: #f3f4f6;
+            --code-color: #1f2937;
+            /* [新增] 字体缩放变量 */
+            --font-scale: 1.0;
+        }
+
+        /* 深色主题 */
+        [data-theme="dark"] {
+            --primary-bg: #1a1a1a;
+            --secondary-bg: #262626;
+            --text-color: #e5e5e5;
+            --header-color: #60a5fa;
+            --accent-color: #3b82f6;
+            --button-bg: #404040;
+            --button-hover-bg: #525252;
+            --border-color: #404040;
+            --note-bg: #1e3a5f;
+            --note-border: #60a5fa;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --code-bg: #374151;
+            --code-color: #f3f4f6;
+        }
+
+        /* 绿色主题（优化：更清新、苹果风） */
+        [data-theme="green"] {
+            --primary-bg: #f6fbf7;
+            /* 柔和浅绿底 */
+            --secondary-bg: #ffffff;
+            --text-color: #0f2e1d;
+            /* 深绿偏中性文字 */
+            --header-color: #2ec866;
+            /* 系统绿风格 */
+            --accent-color: #34c759;
+            /* Apple systemGreen */
+            --button-bg: #e8f5ea;
+            /* 轻浅按钮背景 */
+            --button-hover-bg: #dff1e3;
+            --border-color: #d6eadb;
+            /* 柔和边框 */
+            --note-bg: #edf9f0;
+            /* 浅提示底 */
+            --note-border: #34c759;
+            --code-bg: #f1f6f2;
+            --code-color: #0f2e1d;
+        }
+
+        /* 薄荷主题（新增）：清新薄荷青，Apple systemMint 风格） */
+        [data-theme="mint"] {
+            --primary-bg: #f5fbfa;
+            --secondary-bg: #ffffff;
+            --text-color: #0f2f2e;
+            --header-color: #00c7be;
+            /* systemMint */
+            --accent-color: #20dad0;
+            --button-bg: #e6f7f5;
+            --button-hover-bg: #d7f2ef;
+            --border-color: #cde9e6;
+            --note-bg: #edfafa;
+            --note-border: #00c7be;
+            --code-bg: #eef7f6;
+            --code-color: #0f2f2e;
+        }
+
+        /* 靛蓝主题（新增）：沉稳现代，Apple systemIndigo 风格 */
+        [data-theme="indigo"] {
+            --primary-bg: #f6f7fb;
+            --secondary-bg: #ffffff;
+            --text-color: #1e2233;
+            --header-color: #5856d6;
+            /* systemIndigo */
+            --accent-color: #6b6aed;
+            --button-bg: #eceefa;
+            --button-hover-bg: #e3e6f8;
+            --border-color: #dfe2f3;
+            --note-bg: #eef0fb;
+            --note-border: #6b6aed;
+            --code-bg: #f3f4fa;
+            --code-color: #1e2233;
+        }
+
+        /* ==================== 全局样式 ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background: var(--primary-bg);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* ==================== 演示容器 ==================== */
+        #presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 56.25vw;
+            max-height: 100vh;
+            max-width: 177.78vh;
+            margin: auto;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--secondary-bg);
+            box-shadow: 0 10px 40px var(--shadow-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* ==================== 幻灯片基础样式 ==================== */
+        .slide {
+            width: 100%;
+            height: 100%;
+            padding: 2.0vw;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            position: absolute;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            z-index: 1;
+        }
+
+        /* 使内容区域在 Flex 布局中可伸缩并承担滚动 */
+        .slide-content {
+            width: 100%;
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 1vw;
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: var(--button-bg);
+            border-radius: 4px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background: var(--button-hover-bg);
+        }
+
+        /* ==================== 文本与标题样式 (应用字体缩放) ==================== */
+        h1,
+        h2,
+        h3 {
+            color: var(--header-color);
+            margin-bottom: 0.8vw;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        h1 {
+            font-size: calc(3.2vw * var(--font-scale));
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 1vw;
+        }
+
+        h2 {
+            font-size: calc(2.5vw * var(--font-scale));
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.8vw;
+        }
+
+        h3 {
+            font-size: calc(2.0vw * var(--font-scale));
+            color: var(--text-color);
+            margin-top: 1vw;
+        }
+
+        p,
+        li {
+            font-size: calc(1.5vw * var(--font-scale));
+            line-height: 1.8;
+            margin-bottom: 0.8vw;
+        }
+
+        /* 列表基础间距 */
+        ul,
+        ol {
+            margin: 0.5vw 0 0.5vw 2vw;
+        }
+
+        strong {
+            color: var(--header-color);
+            font-weight: 600;
+        }
+
+        .text-sm {
+            font-size: calc(1.2vw * var(--font-scale));
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        a {
+            color: var(--header-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* 标题页布局 (应用字体缩放) */
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, var(--secondary-bg) 0%, var(--primary-bg) 100%);
+            overflow: hidden;
+        }
+
+        .title-slide h1 {
+            font-size: calc(4vw * var(--font-scale));
+            border: none;
+            margin-bottom: 2vw;
+            background: linear-gradient(90deg, var(--header-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .title-slide .subtitle {
+            font-size: calc(2vw * var(--font-scale));
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 3vw;
+        }
+
+        .title-slide .author {
+            font-size: calc(1.8vw * var(--font-scale));
+            margin-bottom: 0.5vw;
+        }
+
+        .title-slide .institution {
+            font-size: calc(1.5vw * var(--font-scale));
+            margin-bottom: 0.5vw;
+        }
+
+        .title-slide .date {
+            font-size: calc(1.3vw * var(--font-scale));
+            opacity: 0.6;
+        }
+
+        /* 布局与组件 (应用字体缩放) */
+        .columns {
+            display: flex;
+            gap: 2vw;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .column-45 {
+            flex: 0 0 45%;
+        }
+
+        .column-55 {
+            flex: 0 0 55%;
+        }
+
+        figure {
+            margin: 0.3vw 0;
+            text-align: center;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 60vh;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        figcaption {
+            margin-top: 0.3vw;
+            font-size: calc(1.1vw * var(--font-scale));
+            color: var(--text-color);
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        img.clickable {
+            cursor: zoom-in;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        img.clickable:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px var(--shadow-color);
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-color);
+            padding: 1vw;
+            margin: 1vw 0;
+            border-radius: 6px;
+            font-size: calc(1.1vw * var(--font-scale));
+            line-height: 1.6;
+            overflow-x: auto;
+            max-height: 45vh;
+        }
+
+        .note {
+            padding: 1vw 1.2vw;
+            margin-top: 1.5vw;
+            border-radius: 8px;
+            border-left: 4px solid var(--note-border);
+            background: var(--note-bg);
+            font-size: calc(1.3vw * var(--font-scale));
+        }
+
+        table {
+            width: 90%;
+            margin: 1.5vw auto;
+            border-collapse: collapse;
+            font-size: calc(1.3vw * var(--font-scale));
+            box-shadow: 0 2px 8px var(--shadow-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 1vw;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--button-bg);
+            color: var(--header-color);
+            font-weight: 600;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--primary-bg);
+        }
+
+        tbody tr:hover {
+            background: var(--button-hover-bg);
+            transition: background 0.3s ease;
+        }
+
+        /* ==================== 图片全屏展示 ==================== */
+        #image-lightbox {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #image-lightbox.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        #image-lightbox.fit-width {
+            overflow-y: auto;
+            align-items: flex-start;
+        }
+
+        #lightbox-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+
+        #image-lightbox.fit-width #lightbox-img {
+            width: 100%;
+            max-width: 100%;
+            max-height: none;
+            margin-top: 60px;
+            margin-bottom: 20px;
+        }
+
+        .lightbox-close,
+        .lightbox-toggle {
+            position: absolute;
+            top: 20px;
+            color: white;
+            background-color: rgba(30, 30, 30, 0.7);
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-family: sans-serif;
+            transition: background-color 0.2s;
+            z-index: 2001;
+        }
+
+        .lightbox-close:hover,
+        .lightbox-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .lightbox-close {
+            right: 20px;
+            font-size: 30px;
+            line-height: 1;
+            padding: 5px 15px;
+        }
+
+        .lightbox-toggle {
+            right: 85px;
+            font-size: 16px;
+        }
+
+        /* ==================== 控制面板 (功能已恢复) ==================== */
+        #controls {
+            position: fixed;
+            bottom: 2vh;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--secondary-bg);
+            backdrop-filter: blur(10px);
+            padding: 1vh 2vh;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 1.5vh;
+            z-index: 1000;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+
+        #controls button {
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8vh 1.2vh;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.8vh;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 3.5vh;
+            height: 3.5vh;
+        }
+
+        #controls button:hover {
+            background: var(--button-hover-bg);
+            transform: scale(1.1);
+        }
+
+        #slide-counter {
+            font-size: 1.6vh;
+            font-weight: 500;
+            min-width: 8vh;
+            text-align: center;
+        }
+
+        #progress-indicator {
+            width: 20vh;
+            height: 0.5vh;
+            background: var(--button-bg);
+            border-radius: 0.25vh;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--header-color));
+            transition: width 0.5s ease;
+        }
+
+        #theme-btn {
+            position: relative;
+        }
+
+        .theme-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5vh;
+            margin-bottom: 0.5vh;
+            display: none;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            z-index: 1001;
+        }
+
+        .theme-menu.show {
+            display: block;
+        }
+
+        .theme-option {
+            padding: 0.5vh 1vh;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1.4vh;
+            white-space: nowrap;
+        }
+
+        .theme-option:hover {
+            background: var(--button-bg);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="presentation-container">
+
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div class="slide-content title-slide">
+                <h1>工作进展汇报与文献分享</h1>
+                <p class="subtitle">2025年秋季学期 组会展示</p>
+                <p class="author"><strong>BY2405316 严五金</strong></p>
+                <p class="institution">北京航空航天大学 航空科学与工程学院</p>
+                <p class="date" id="current-date"></p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Work Summary -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>本周工作内容汇报</h1>
+                <ol style="list-style: none; padding-left: 0;">
+                    <li>
+                        <h3>论文消融实验</h3>
+                        <p>针对正在撰写的论文，设计并完成了15组消融实验，以验证模型各组件的有效性。目前有两组实验结果存在异常，正在进行调试与修正。</p>
+                    </li>
+                    <li>
+                        <h3>LB-Heat 框架初步搭建</h3>
+                        <p>完成了基于格子玻尔兹曼方法（LBM）的导热仿真框架 <strong>LB-Heat</strong> 的初步搭建工作。该框架目前已具备模拟不同维度（1D/2D/3D）、多种边界条件和初始工况下导热问题的能力。
+                        </p>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Slide 3: Paper Intro -->
+        <div class="slide">
+            <div class="slide-content title-slide">
+                <h2 style="font-size: 2.5vw; color: var(--header-color); border: none;">文献分享</h2>
+                <h1 style="font-size: 3.2vw;">T-phPINN: Physics-informed neural networks for solving 2D non-Fourier heat
+                    conduction equations</h1>
+                <p class="author text-sm" style="margin-top: 2vw;">Jinglai Zheng, Fan Li, Haiming Huang</p>
+                <p class="date text-sm">Beijing Jiaotong University</p>
+                <p class="date text-sm" style="font-style: italic;">International Journal of Heat and Mass Transfer 235
+                    (2024) 126216</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Background -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>背景：非傅里叶导热的挑战</h1>
+                <h3>什么是“非傅里叶”导热？</h3>
+                <p>经典傅里叶定律假设热量传播速度无限大，但在极端瞬态场景（如超短脉冲激光、生物组织传热）下失效。非傅里叶模型（如CV模型）引入<strong>弛豫时间
+                        $\tau$</strong>，将导热方程变为<strong>双曲型</strong>，描述了热量以有限速度传播的“热波”现象。</p>
+                <p><strong> governing equation:</strong>
+                    $\quad \tau \frac{\partial^2 T}{\partial t^2} + \frac{\partial T}{\partial t} = a \nabla^2 T$
+                </p>
+                <h3>传统数值方法的困境</h3>
+                <ul>
+                    <li><strong>网格依赖：</strong>FEM、FVM等方法需要精细的网格来捕捉热波导致的<strong>剧烈温度梯度</strong>，计算成本高昂。</li>
+                    <li><strong>数值振荡：</strong>网格或时间步长不当时，容易在波前产生非物理振荡（见附录A）。</li>
+                    <li><strong>重复计算：</strong>对于不同物理参数（如$\tau$）的问题，需要从头开始重新计算。</li>
+                </ul>
+                <div class="note">
+                    <strong>本文动机：</strong> 提出一种基于 PINN 的新方法，以无网格、高效率的方式精确求解具有挑战性的非傅里叶导热问题。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: PINN Primer -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>[重点] 物理信息神经网络(PINN)如何工作？</h1>
+                <p>PINN 的核心思想是利用神经网络的函数拟合能力，将物理方程作为一种特殊的“监督信息”来训练网络。</p>
+                <h3>第一步：神经网络作为解的代理</h3>
+                <p>我们假设一个神经网络 $T_{NN}(x, y, t; \theta)$ 可以逼近真实的温度场 $T(x, y, t)$。网络的输入是时空坐标 $(x, y, t)$，输出是温度
+                    $T$，$\theta$ 是网络的权重和偏置。</p>
+                <h3>第二步：构建基于“物理”的损失函数</h3>
+                <p>训练的目标不是拟合数据点，而是让网络输出的 $T_{NN}$ 满足物理定律。总损失函数由几部分构成：</p>
+                <ul>
+                    <li><strong>PDE 损失 ($L_{pde}$):</strong> 将 $T_{NN}$ 代入控制方程，计算方程左边减右边的残差。我们希望这个残差处处为零。
+                        <br>$L_{pde} = || \tau \frac{\partial^2 T_{NN}}{\partial t^2} + \frac{\partial T_{NN}}{\partial
+                        t} - a \nabla^2 T_{NN} ||^2$
+                    </li>
+                    <li><strong>边界条件损失 ($L_{bc}$):</strong> 在边界上，$T_{NN}$ 的值应满足给定的边界条件。</li>
+                    <li><strong>初始条件损失 ($L_{ic}$):</strong> 在初始时刻 $t=0$，$T_{NN}$ 的值应满足给定的初始条件。</li>
+                </ul>
+                <p style="text-align:center;"><strong>Total Loss = $w_1 L_{pde} + w_2 L_{bc} + w_3 L_{ic}$</strong></p>
+                <div class="note">
+                    <strong>关键技术：自动微分 (Automatic Differentiation)</strong>。现代深度学习框架可以自动计算出 $T_{NN}$ 对输入 $(x, y, t)$
+                    的任意阶导数，从而轻松构建 $L_{pde}$，这是 PINN 实现的基石。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: The Innovation: T-phPINN -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>本文的创新：T-phPINN 架构</h1>
+                <p>常规 PINN 直接求解二阶时间导数的双曲型方程，难以捕捉热波的剧烈变化。本文提出 T-phPINN，通过巧妙的结构设计来解决这个问题。</p>
+                <div class="columns">
+                    <div class="column column-55">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d3bj6gs601uc738bpsg0_3.jpg?x=123&y=148&w=1492&h=1293&r=0"
+                                alt="T-phPINN Framework" class="clickable" style="max-height: 70vh;" />
+                            <figcaption>Fig. 2. (a) T-phPINN 架构流程图</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column column-45">
+                        <h3>核心改进</h3>
+                        <ol>
+                            <li><strong>双子网络结构:</strong>
+                                <ul>
+                                    <li><strong>网络1 (Net1):</strong> 预测温度场 $T^*$。</li>
+                                    <li><strong>网络2 (Net2):</strong> <strong>显式地</strong>预测温度对时间的一阶导数 $V^* =
+                                        \frac{\partial T^*}{\partial t^*}$。</li>
+                                </ul>
+                            </li>
+                            <li><strong>方程降阶:</strong>
+                                <p>通过引入 $V^*$，原始的二阶方程被转化为一个一阶方程组，降低了网络学习的难度。</p>
+                                <p>$\frac{Ve^2}{Fo^2}\frac{\partial V^*}{\partial t^*} + \frac{1}{Fo}V^* =
+                                    \frac{\partial^2 T^*}{\partial x^{*2}} + \frac{\partial^2 T^*}{\partial y^{*2}}$</p>
+                            </li>
+                            <li><strong>新增近似损失 ($L_{app}$):</strong>
+                                <p>增加一个损失项，强制约束两个网络输出之间的物理关系：</p>
+                                <p>$L_{app} = || V^* - \frac{\partial T^*}{\partial t^*} ||^2_2$</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Hard Constraints -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>关键技术：硬约束 (Hard Constraints)</h1>
+                <p>除了改进网络结构，T-phPINN 还使用硬约束来精确满足边界/初始条件，这比在损失函数中惩罚误差（软约束）更有效。</p>
+                <h3>工作原理</h3>
+                <p>硬约束通过一个精巧的数学变换，将神经网络的原始输出（值域任意）转换为一个<strong>必然满足</strong>指定条件的函数，而无需训练。</p>
+                <h3>示例 (Case 1)</h3>
+                <ul>
+                    <li><strong>温度网络 (Net1) 硬约束 $H_1$:</strong>
+                        <p>$T^*(x^*, y^*, t^*) = (1-y^*) + y^*(1-y^*) \times (\text{Net1_output})$</p>
+                        <p>这个构造保证了：当 $y^*=0$ 时，$T^*=1$；当 $y^*=1$ 时，$T^*=0$。这两个边界条件被完美满足。</p>
+                    </li>
+                    <li><strong>导数网络 (Net2) 硬约束 $H_2$:</strong>
+                        <p>$V^*(x^*, y^*, t^*) = t^* \times (\text{Net2_output})$</p>
+                        <p>这个构造保证了：当 $t^*=0$ 时，$V^*=0$。初始时刻温度变化率为零的条件被完美满足。</p>
+                    </li>
+                </ul>
+                <div class="note">
+                    <strong>优势：</strong> 硬约束将部分物理知识直接“编码”到网络结构中，减轻了优化器的负担，使得网络可以更专注于学习方程本身的解，从而提高训练效率和精度。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Results (Case 1) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结果：T-phPINN vs. 常规PINN (hPINN)</h1>
+                <p>以 Case 1 为例，对比 T-phPINN 与优化后的常规硬约束 PINN (hPINN) 的性能。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d3bj6gs601uc738bpsg0_5.jpg?x=126&y=153&w=1494&h=1227&r=0"
+                        alt="Results for Case 1" class="clickable" style="width: 40%; height: auto;" />
+                    <figcaption>Fig. 3. Case 1 的训练过程与预测结果对比</figcaption>
+                </figure>
+                <ul>
+                    <li><strong>训练损失 (a, b):</strong> T-phPINN 的最终损失比 hPINN 低了<strong>两个数量级</strong> (0.00093 vs
+                        0.05817)，表明其拟合能力更强。</li>
+                    <li><strong>相对误差 (c):</strong> T-phPINN 的误差极低 (最低 0.001%)，仅为 hPINN 的 <strong>1.04%</strong>。</li>
+                    <li><strong>物理保真度 (d):</strong> 在热波后方（$y^* \in [0.5, 1.0]$），真实温度应为零。T-phPINN 准确预测了这一点，而 hPINN
+                        出现了非物理的非零温度，未能捕捉到热波的传播特性。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 9: Visualizing Accuracy -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结果可视化：精确捕捉热波传播</h1>
+                <p>对比 T-phPINN 与高精度 FEM 的解，进一步展示其准确性。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d3bj6gs601uc738bpsg0_6.jpg?x=119&y=150&w=1498&h=1364&r=0"
+                        alt="Solution Comparison Case 1" class="clickable" />
+                    <figcaption>Fig. 4. Case 1 中 T-phPINN (第一行) 与 FEM (第二行) 的温度云图及绝对误差 (第三行) 对比。</figcaption>
+                </figure>
+                <div class="note">
+                    <strong>结论：</strong> T-phPINN 的解在绝大部分区域与 FEM
+                    高度吻合。最大的绝对误差集中在<strong>热波波前</strong>的剧烈变化区域，这符合物理直觉。该方法成功捕捉了热波的传播、反射等复杂行为。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Transfer Learning -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>加速计算：迁移学习框架</h1>
+                <p>面对不同物理参数（如傅里叶数 $Fo$、韦诺特数 $Ve$）的系列问题，迁移学习可以极大提升效率。</p>
+                <div class="columns">
+                    <div class="column column-45">
+                        <h3>工作流程</h3>
+                        <ol>
+                            <li><strong>训练基础模型：</strong>首先在一个基准参数组（Parameter 1）上充分训练 T-phPINN。</li>
+                            <li><strong>知识迁移：</strong>当求解新参数组（如 Parameter
+                                2-5）的问题时，不再随机初始化网络权重，而是直接<strong>加载基础模型的权重</strong>作为初始值。</li>
+                            <li><strong>快速微调：</strong>在新参数下进行短暂的训练，即可快速收敛到精确解。</li>
+                        </ol>
+                        <h3>关键结果</h3>
+                        <p>如 Table 1 所示，迁移学习模型仅需 <strong>50,000</strong> 次迭代即可收敛，而基础模型需要 <strong>300,000</strong>
+                            次。训练迭代次数减少了 <strong>83% (1/6)</strong>，同时保持了相近的精度。</p>
+                    </div>
+                    <div class="column column-55">
+                        <figure>
+                            <img src="https://cdn.noedgeai.com/bo_d3bj6gs601uc738bpsg0_9.jpg?x=120&y=845&w=1501&h=1271&r=0"
+                                alt="Transfer Learning Results" class="clickable" style="max-height: 70vh;" />
+                            <figcaption>Fig. 7. 迁移学习模型与基础模型的(a)训练过程、(b)损失、(c)误差对比。</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Performance -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>性能评估：计算成本分析</h1>
+                <p>与高精度 FEM 求解器进行壁钟时间（Wall time）对比，评估 T-phPINN 的实际计算效率。</p>
+                <figure>
+                    <img src="https://cdn.noedgeai.com/bo_d3bj6gs601uc738bpsg0_10.jpg?x=126&y=153&w=1486&h=657&r=0"
+                        alt="Time Cost Comparison" class="clickable" style="width: 80%;" />
+                    <figcaption>Fig. 8. T-phPINN 与 FEM 在单次计算和多次计算（利用迁移学习）下的时间成本对比。</figcaption>
+                </figure>
+                <div class="columns">
+                    <div class="column">
+                        <h3>单次计算</h3>
+                        <p>T-phPINN 的计算时间仅为 FEM 的 <strong>33.43%</strong> (Case 1) 和 <strong>51.50%</strong> (Case
+                            2)。这得益于其无网格特性，避免了 FEM 为保证精度所需的超精细网格剖分。</p>
+                    </div>
+                    <div class="column">
+                        <h3>多次计算 (参数化研究)</h3>
+                        <p>在迁移学习的加持下，T-phPINN 解决5组不同参数问题的平均时间，仅为 FEM 的 <strong>11.59%</strong> (Case 1) 和
+                            <strong>17.75%</strong> (Case 2)，展现出巨大的效率优势。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Conclusion -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结论</h1>
+                <div class="columns">
+                    <div class="column">
+                        <h3>方法创新</h3>
+                        <ul>
+                            <li>提出了 <strong>T-phPINN 架构</strong>，通过双子网络和显式学习时间导数，显著提升了求解双曲型非傅里叶导热方程的精度和稳定性。</li>
+                            <li>结合<strong>硬约束</strong>技术，精确施加边界和初始条件，进一步提高了模型的物理保真度。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>性能优势</h3>
+                        <ul>
+                            <li><strong>高精度：</strong>相对误差比常规 PINN 低1-2个数量级，准确捕捉了热波效应。</li>
+                            <li><strong>高效率：</strong>单次计算速度优于 FEM，结合<strong>迁移学习</strong>后，在参数化研究中展现出压倒性的速度优势。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="note" style="margin-top: 2vw;">
+                    <strong>核心价值：</strong> 本文为求解具有波动特性的复杂物理方程提供了一种高效、精确的深度学习新范式，在需要进行大规模参数化研究的科学与工程领域具有广阔的应用前景。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Q&A -->
+        <div class="slide">
+            <div class="slide-content title-slide">
+                <h1>感谢聆听</h1>
+                <p class="subtitle" style="margin-top: 3vw;">问答环节 (Q&A)</p>
+            </div>
+        </div>
+
+        <!-- Image Lightbox -->
+        <div id="image-lightbox">
+            <span class="lightbox-close" title="关闭 (Esc)">×</span>
+            <button class="lightbox-toggle" title="切换视图模式"></button>
+            <img src="" alt="全屏视图" id="lightbox-img">
+        </div>
+
+    </div>
+
+    <!-- [恢复] 完整的控制面板 -->
+    <div id="controls">
+        <button id="prev-btn" title="上一页 (←)">◀</button>
+        <button id="first-btn" title="第一页 (Home)">⏮</button>
+        <span id="slide-counter">1 / 13</span>
+        <button id="last-btn" title="最后一页 (End)">⏭</button>
+        <button id="next-btn" title="下一页 (→)">▶</button>
+        <div id="progress-indicator">
+            <div id="progress-bar"></div>
+        </div>
+        <button id="goto-btn" title="跳转 (G)">🔢</button>
+        <button id="font-dec-btn" title="减小字号">A-</button>
+        <button id="font-inc-btn" title="增大字号">A+</button>
+        <button id="theme-btn" title="切换主题">🎨
+            <div class="theme-menu" id="theme-menu">
+                <div class="theme-option" data-theme="default">专业蓝</div>
+                <div class="theme-option" data-theme="dark">深色</div>
+                <div class="theme-option" data-theme="green">清新绿</div>
+                <div class="theme-option" data-theme="mint">薄荷青</div>
+                <div class="theme-option" data-theme="indigo">靛蓝</div>
+            </div>
+        </button>
+        <button id="fullscreen-btn" title="全屏 (F)">⛶</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // [恢复] 动态设置日期
+            function setDynamicDate() {
+                const dateElement = document.getElementById('current-date');
+                if (dateElement) {
+                    const today = new Date();
+                    dateElement.textContent = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+                }
+            }
+            setDynamicDate();
+
+            // [恢复] 获取所有需要的元素
+            const presentationContainer = document.getElementById('presentation-container');
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            const controls = {
+                prev: document.getElementById('prev-btn'),
+                next: document.getElementById('next-btn'),
+                first: document.getElementById('first-btn'),
+                last: document.getElementById('last-btn'),
+                goto: document.getElementById('goto-btn'),
+                fontDec: document.getElementById('font-dec-btn'),
+                fontInc: document.getElementById('font-inc-btn'),
+                theme: document.getElementById('theme-btn'),
+                themeMenu: document.getElementById('theme-menu'),
+                fullscreen: document.getElementById('fullscreen-btn'),
+                counter: document.getElementById('slide-counter'),
+                progressBar: document.getElementById('progress-bar')
+            };
+
+            let currentSlide = 0;
+            let fontScale = 1.0;
+
+            // [恢复] 字体缩放功能
+            function updateFontScale() {
+                presentationContainer.style.setProperty('--font-scale', fontScale);
+            }
+            controls.fontInc.addEventListener('click', () => {
+                fontScale = Math.min(1.5, fontScale + 0.1);
+                updateFontScale();
+            });
+            controls.fontDec.addEventListener('click', () => {
+                fontScale = Math.max(0.7, fontScale - 0.1);
+                updateFontScale();
+            });
+
+            // [恢复] 主题切换功能
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('presentation-theme', theme);
+                controls.themeMenu.classList.remove('show');
+            }
+            controls.theme.addEventListener('click', (e) => { e.stopPropagation(); controls.themeMenu.classList.toggle('show'); });
+            document.addEventListener('click', () => controls.themeMenu.classList.remove('show'));
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', (e) => { e.stopPropagation(); setTheme(option.dataset.theme); });
+            });
+
+            // [恢复] 全屏功能
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    presentationContainer.requestFullscreen().catch(err => console.error(`Fullscreen error: ${err.message}`));
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            controls.fullscreen.addEventListener('click', toggleFullscreen);
+
+            // 幻灯片导航
+            function showSlide(index) {
+                if (index < 0 || index >= totalSlides) return;
+                slides.forEach((s, i) => s.classList.toggle('active', i === index));
+                currentSlide = index;
+                controls.counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                controls.progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+                if (window.MathJax && window.MathJax.typeset) {
+                    MathJax.typesetPromise([slides[index]]).catch(err => console.error('MathJax error:', err));
+                }
+            }
+
+            const slideActions = {
+                next: () => showSlide(currentSlide + 1),
+                prev: () => showSlide(currentSlide - 1),
+                first: () => showSlide(0),
+                last: () => showSlide(totalSlides - 1),
+                goto: () => {
+                    const numStr = prompt(`跳转到第几页? (1-${totalSlides})`);
+                    if (numStr) {
+                        const num = parseInt(numStr, 10) - 1;
+                        if (!isNaN(num) && num >= 0 && num < totalSlides) showSlide(num);
+                    }
+                }
+            };
+            controls.next.addEventListener('click', slideActions.next);
+            controls.prev.addEventListener('click', slideActions.prev);
+            controls.first.addEventListener('click', slideActions.first);
+            controls.last.addEventListener('click', slideActions.last);
+            controls.goto.addEventListener('click', slideActions.goto);
+
+            // 图片灯箱功能
+            const lightbox = document.getElementById('image-lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxClose = lightbox.querySelector('.lightbox-close');
+            const lightboxToggle = lightbox.querySelector('.lightbox-toggle');
+            function openLightbox(src) {
+                lightboxImg.src = src;
+                lightbox.classList.remove('fit-width');
+                lightboxToggle.textContent = '⤢ 适应宽度';
+                lightbox.classList.add('visible');
+            }
+            function closeLightbox() { lightbox.classList.remove('visible'); }
+            document.querySelectorAll('img.clickable').forEach(img => img.addEventListener('click', (e) => { e.stopPropagation(); openLightbox(img.src); }));
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => (e.target === lightbox) && closeLightbox());
+            lightboxToggle.addEventListener('click', () => {
+                const isFitWidth = lightbox.classList.toggle('fit-width');
+                lightboxToggle.textContent = isFitWidth ? '↔ 适应屏幕' : '⤢ 适应宽度';
+            });
+
+            // [恢复] 完整的键盘事件监听
+            document.addEventListener('keydown', (e) => {
+                if (lightbox.classList.contains('visible')) {
+                    if (e.key === 'Escape') closeLightbox();
+                    return;
+                }
+                switch (e.key) {
+                    case 'ArrowRight': case ' ': e.preventDefault(); slideActions.next(); break;
+                    case 'ArrowLeft': e.preventDefault(); slideActions.prev(); break;
+                    case 'Home': e.preventDefault(); slideActions.first(); break;
+                    case 'End': e.preventDefault(); slideActions.last(); break;
+                    case 'f': case 'F': e.preventDefault(); toggleFullscreen(); break;
+                    case 'g': case 'G': e.preventDefault(); slideActions.goto(); break;
+     case 'Escape': if (document.fullscreenElement) document.exitFullscreen(); break;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+                    e.preventDefault();
+                    controls.fontInc.click();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+                    e.preventDefault();
+                    controls.fontDec.click();
+                }
+            });
+
+            // 初始化
+            const savedTheme = localStorage.getItem('presentation-theme') || 'default';
+            setTheme(savedTheme);
+            showSlide(0);
+        });
+    </script>
+</body>
+
+</html>

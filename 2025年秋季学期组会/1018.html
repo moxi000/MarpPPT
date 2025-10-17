@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>组会汇报 - PINN 在多孔介质导热中的应用</title>
+
+    <!-- MathJax 配置 - 支持数学公式 -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <style>
+        /* ==================== 主题变量 ==================== */
+        :root {
+            /* 默认主题 - 专业蓝 */
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --text-color: #2c3e50;
+            --header-color: #2563eb;
+            --accent-color: #3b82f6;
+            --button-bg: #e5e7eb;
+            --button-hover-bg: #d1d5db;
+            --border-color: #d1d5db;
+            --note-bg: #eff6ff;
+            --note-border: #3b82f6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --code-bg: #f3f4f6;
+            --code-color: #1f2937;
+            --font-scale: 1.0;
+        }
+
+        /* 深色主题 */
+        [data-theme="dark"] {
+            --primary-bg: #1a1a1a;
+            --secondary-bg: #262626;
+            --text-color: #e5e5e5;
+            --header-color: #60a5fa;
+            --accent-color: #3b82f6;
+            --button-bg: #404040;
+            --button-hover-bg: #525252;
+            --border-color: #404040;
+            --note-bg: #1e3a5f;
+            --note-border: #60a5fa;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --code-bg: #374151;
+            --code-color: #f3f4f6;
+        }
+
+        /* 绿色主题 */
+        [data-theme="green"] {
+            --primary-bg: #f6fbf7;
+            --secondary-bg: #ffffff;
+            --text-color: #0f2e1d;
+            --header-color: #2ec866;
+            --accent-color: #34c759;
+            --button-bg: #e8f5ea;
+            --button-hover-bg: #dff1e3;
+            --border-color: #d6eadb;
+            --note-bg: #edf9f0;
+            --note-border: #34c759;
+            --code-bg: #f1f6f2;
+            --code-color: #0f2e1d;
+        }
+
+        /* 薄荷主题 */
+        [data-theme="mint"] {
+            --primary-bg: #f5fbfa;
+            --secondary-bg: #ffffff;
+            --text-color: #0f2f2e;
+            --header-color: #00c7be;
+            --accent-color: #20dad0;
+            --button-bg: #e6f7f5;
+            --button-hover-bg: #d7f2ef;
+            --border-color: #cde9e6;
+            --note-bg: #edfafa;
+            --note-border: #00c7be;
+            --code-bg: #eef7f6;
+            --code-color: #0f2f2e;
+        }
+
+        /* 靛蓝主题 */
+        [data-theme="indigo"] {
+            --primary-bg: #f6f7fb;
+            --secondary-bg: #ffffff;
+            --text-color: #1e2233;
+            --header-color: #5856d6;
+            --accent-color: #6b6aed;
+            --button-bg: #eceefa;
+            --button-hover-bg: #e3e6f8;
+            --border-color: #dfe2f3;
+            --note-bg: #eef0fb;
+            --note-border: #6b6aed;
+            --code-bg: #f3f4fa;
+            --code-color: #1e2233;
+        }
+
+        /* ==================== 全局样式 ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background: var(--primary-bg);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            overflow: hidden;
+            transition: background-color .3s ease, color .3s ease;
+        }
+
+        /* ==================== 演示容器 ==================== */
+        #presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 56.25vw;
+            max-height: 100vh;
+            max-width: 177.78vh;
+            margin: auto;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--secondary-bg);
+            box-shadow: 0 10px 40px var(--shadow-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all .3s ease;
+        }
+
+        /* ==================== 幻灯片基础样式 ==================== */
+        .slide {
+            width: 100%;
+            height: 100%;
+            padding: 3vw;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity .5s ease-in-out;
+            position: absolute;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            z-index: 1;
+        }
+
+        .slide-content {
+            width: 100%;
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 1vw;
+        }
+
+        .slide-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide-content::-webkit-scrollbar-track {
+            background: var(--button-bg);
+            border-radius: 4px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .slide-content::-webkit-scrollbar-thumb:hover {
+            background: var(--button-hover-bg);
+        }
+
+        /* ==================== 文本与标题样式 (应用字体缩放) ==================== */
+        h1,
+        h2,
+        h3 {
+            color: var(--header-color);
+            margin-bottom: 1.5vw;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        h1 {
+            font-size: calc(3.2vw * var(--font-scale));
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 1vw;
+        }
+
+        h2 {
+            font-size: calc(2.5vw * var(--font-scale));
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: .8vw;
+        }
+
+        h3 {
+            font-size: calc(2.0vw * var(--font-scale));
+            color: var(--text-color);
+            margin-top: 1vw;
+        }
+
+        h4 {
+            font-size: calc(1.5vw * var(--font-scale));
+            color: var(--text-color);
+            margin-bottom: 1vw;
+            font-weight: 600;
+        }
+
+        p,
+        li {
+            font-size: calc(1.5vw * var(--font-scale));
+            line-height: 1.8;
+            margin-bottom: 1.2vw;
+        }
+
+        ul,
+        ol {
+            margin: 1vw 0 1vw 2vw;
+        }
+
+        strong {
+            color: var(--header-color);
+            font-weight: 600;
+        }
+
+        .text-sm {
+            font-size: calc(1.2vw * var(--font-scale));
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        a {
+            color: var(--header-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* 标题页布局 */
+        .title-slide {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, var(--secondary-bg) 0%, var(--primary-bg) 100%);
+            overflow: hidden;
+        }
+
+        .title-slide h1 {
+            font-size: calc(4vw * var(--font-scale));
+            border: none;
+            margin-bottom: 2vw;
+            background: linear-gradient(90deg, var(--header-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .title-slide .subtitle {
+            font-size: calc(2vw * var(--font-scale));
+            color: var(--text-color);
+            opacity: .8;
+            margin-bottom: 3vw;
+        }
+
+        .title-slide .author {
+            font-size: calc(1.8vw * var(--font-scale));
+            margin-bottom: .5vw;
+        }
+
+        .title-slide .institution {
+            font-size: calc(1.5vw * var(--font-scale));
+            margin-bottom: .5vw;
+        }
+
+        .title-slide .date {
+            font-size: calc(1.3vw * var(--font-scale));
+            opacity: .6;
+        }
+
+        /* 布局与组件 */
+        .columns {
+            display: flex;
+            gap: 2vw;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .column {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .column-45 {
+            flex: 0 0 45%;
+        }
+
+        .column-55 {
+            flex: 0 0 55%;
+        }
+
+        figure {
+            margin: 1vw 0;
+            text-align: center;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 60vh;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        figcaption {
+            margin-top: .8vw;
+            font-size: calc(1.1vw * var(--font-scale));
+            color: var(--text-color);
+            opacity: .7;
+            font-style: italic;
+        }
+
+        img.clickable {
+            cursor: zoom-in;
+            transition: transform .3s, box-shadow .3s;
+        }
+
+        img.clickable:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px var(--shadow-color);
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: var(--code-color);
+            padding: 1vw;
+            margin: 1vw 0;
+            border-radius: 6px;
+            font-size: calc(1.1vw * var(--font-scale));
+            line-height: 1.6;
+            overflow-x: auto;
+            max-height: 45vh;
+        }
+
+        .note {
+            padding: 1vw 1.2vw;
+            margin-top: 1.5vw;
+            border-radius: 8px;
+            border-left: 4px solid var(--note-border);
+            background: var(--note-bg);
+            font-size: calc(1.3vw * var(--font-scale));
+        }
+
+        table {
+            width: 90%;
+            margin: 1.5vw auto;
+            border-collapse: collapse;
+            font-size: calc(1.3vw * var(--font-scale));
+            box-shadow: 0 2px 8px var(--shadow-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 1vw;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--button-bg);
+            color: var(--header-color);
+            font-weight: 600;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--primary-bg);
+        }
+
+        tbody tr:hover {
+            background: var(--button-hover-bg);
+            transition: background .3s ease;
+        }
+
+        /* ==================== MathJax 字体大小终极解决方案 ==================== */
+        /*
+         * By default MathJax renders both display and inline formulae at a
+         * baseline of 1em, which corresponds to the browser's root font size
+         * (usually 16 px).  In this presentation the body text sizes are
+         * expressed in viewport‑relative units (vw) and therefore scale with
+         * the slide dimensions.  As a result the default MathJax rendering
+         * appears noticeably smaller than the surrounding text.  The following
+         * rules make two key adjustments:
+         *   1. Inline equations are set to inherit the surrounding font size
+         *      (1em) so that they match the body text.  No additional
+         *      scaling is applied.
+         *   2. Display equations are dramatically enlarged via a CSS
+         *      transform.  The current configuration scales them to roughly
+         *      three times their original size, making block formulas much
+         *      more prominent.
+         */
+        /* Inline equations: inherit the parent text size (1 em).  We no longer
+           apply any scaling here so that inline math matches the surrounding
+           text exactly. */
+        mjx-container[jax="SVG"] {
+            font-size: 1em;
+        }
+
+        /* Display equations: block layout with substantial scaling.  To enlarge
+           block formulas to roughly three times their normal size we set
+           the font-size to 3em.  Using font-size instead of transform
+           preserves line breaks and overall layout. */
+        mjx-container[jax="SVG"][display="true"] {
+            display: block;
+            margin: 2vw auto 1vw;
+            font-size: 3em;
+            /* Ensure long display equations do not overflow their container.
+               Allow horizontal scrolling if necessary rather than clipping. */
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        /* ==================== 图片全屏展示 ==================== */
+        #image-lightbox {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, .9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity .3s ease-in-out;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #image-lightbox.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        #image-lightbox.fit-width {
+            overflow-y: auto;
+            align-items: flex-start;
+        }
+
+        #lightbox-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+            border-radius: 8px;
+        }
+
+        #image-lightbox.fit-width #lightbox-img {
+            width: 100%;
+            max-width: 100%;
+            max-height: none;
+            margin-top: 60px;
+            margin-bottom: 20px;
+        }
+
+        .lightbox-close,
+        .lightbox-toggle {
+            position: absolute;
+            top: 20px;
+            color: #fff;
+            background-color: rgba(30, 30, 30, .7);
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-family: sans-serif;
+            transition: background-color .2s;
+            z-index: 2001;
+        }
+
+        .lightbox-close:hover,
+        .lightbox-toggle:hover {
+            background-color: rgba(0, 0, 0, .9);
+        }
+
+        .lightbox-close {
+            right: 20px;
+            font-size: 30px;
+            line-height: 1;
+            padding: 5px 15px;
+        }
+
+        .lightbox-toggle {
+            right: 85px;
+            font-size: 16px;
+        }
+
+        /* ==================== 控制面板 ==================== */
+        #controls {
+            position: fixed;
+            bottom: 2vh;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--secondary-bg);
+            backdrop-filter: blur(10px);
+            padding: 1vh 2vh;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 1.5vh;
+            z-index: 1000;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+
+        #controls button {
+            background: var(--button-bg);
+            color: var(--text-color);
+            border: none;
+            padding: .8vh 1.2vh;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.8vh;
+            transition: all .3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 3.5vh;
+            height: 3.5vh;
+        }
+
+        #controls button:hover {
+            background: var(--button-hover-bg);
+            transform: scale(1.1);
+        }
+
+        #slide-counter {
+            font-size: 1.6vh;
+            font-weight: 500;
+            min-width: 8vh;
+            text-align: center;
+        }
+
+        #progress-indicator {
+            width: 20vh;
+            height: .5vh;
+            background: var(--button-bg);
+            border-radius: .25vh;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--header-color));
+            transition: width .5s ease;
+        }
+
+        #theme-btn {
+            position: relative;
+        }
+
+        .theme-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: .5vh;
+            margin-bottom: .5vh;
+            display: none;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            z-index: 1001;
+        }
+
+        .theme-menu.show {
+            display: block;
+        }
+
+        .theme-option {
+            padding: .5vh 1vh;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1.4vh;
+            white-space: nowrap;
+        }
+
+        .theme-option:hover {
+            background: var(--button-bg);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="presentation-container">
+
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <div class="slide-content title-slide">
+                <h1>工作进展汇报与文献分享</h1>
+                <p class="subtitle">Physics-informed neural networks for studying heat transfer in porous media</p>
+                <p class="author"><strong>BY2405316 严五金</strong></p>
+                <p class="institution">北京航空航天大学 航空科学与工程学院</p>
+                <p class="date" id="current-date"></p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Weekly To-Do -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>本周工作内容汇报</h1>
+                <ol>
+                    <li>
+                        <h3>PINN 进阶理论学习</h3>
+                        <p>系统学习了 PINN 训练中的<strong>自适应权重分配</strong>策略、<strong>Residual-based Adaptive Refinement
+                                (RAR)</strong>
+                            与<strong>Physics-Balanced Residual Learning (PBRL)</strong> 等前沿理论，旨在解决多尺度、高梯度问题中的训练难题。
+                        </p>
+                    </li>
+                    <li>
+                        <h3>多孔介质建模与数值实现</h3>
+                        <p>深入研究了多孔介质的结构生成方法（如
+                            <strong>QSGS</strong>）、并学习了使用有限体积法（<strong>FVM</strong>）求解热传导问题与提取有效热导率的流程，为后续 PINN
+                            代理模型的构建准备几何输入和验证基准。</p>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Slide 3: Paper Intro -->
+        <div class="slide">
+            <div class="slide-content title-slide">
+                <h2 style="font-size: 2.5vw; color: var(--header-color); border: none;">文献分享</h2>
+                <h1 style="font-size: 3.2vw;">Physics-informed neural networks for studying heat transfer in porous
+                    media</h1>
+                <p class="author text-sm" style="margin-top: 2vw;">Jiaxuan Xu, Han Wei, Hua Bao*</p>
+                <p class="date text-sm">Global Institute of Future Technology &amp; UM-SJTU Joint Institute, Shanghai
+                    Jiao Tong University</p>
+                <p class="date text-sm" style="font-style: italic;">International Journal of Heat and Mass Transfer
+                    <strong>217</strong> (2023) 124671
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Background -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>研究背景：数据驱动方法的“痛”</h1>
+                <p>预测多孔介质的传热特性（如有效导热系数、温度/热流场）至关重要。传统方法面临两难：</p>
+                <div class="columns">
+                    <div class="column">
+                        <h3>物理模型 & 数值模拟</h3>
+                        <ul>
+                            <li><strong>EMT (解析模型):</strong> 速度快，但精度有限，忽略微观结构。</li>
+                            <li><strong>FVM/FEM (数值模拟):</strong> 精度高，但计算成本巨大，耗时耗力。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>数据驱动机器学习 (如CNN)</h3>
+                        <ul>
+                            <li><strong>优点:</strong> 兼具高精度和高效率，是优秀的代理模型。</li>
+                            <li><strong>致命弱点:</strong> 严重依赖<strong>海量的、高质量的标注数据</strong>。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="note">
+                    <strong>核心矛盾：</strong>
+                    获取这些标注数据通常需要进行大量的数值模拟，这本身就是一个“鸡生蛋，蛋生鸡”的悖论。我们能否<strong>摆脱对标注数据的依赖</strong>，直接利用物理知识来训练神经网络？
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Physical Problem -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>物理问题与控制方程</h1>
+                <div class="columns">
+                    <div class="column column-55">
+                        <p>研究二维多孔介质（区域 $\Gamma=[0,1]\times[0,1]$）内的稳态热传导问题：</p>
+                        <h4>本构关系 & 能量守恒</h4>
+                        $$-\kappa(T,\mathbf{x})\nabla T(\mathbf{x})=\mathbf{q}(\mathbf{x}),\quad \mathbf{x}\in\Gamma
+                        \tag{1}$$
+                        $$\nabla\cdot\big[\kappa(T,\mathbf{x})\nabla T(\mathbf{x})\big]=0,\quad \mathbf{x}\in\Gamma
+                        \tag{2}$$
+                        <h4>边界条件</h4>
+                        $$\begin{aligned}
+                        &T(\mathbf{x}) = T_1\;(=1),\quad \mathbf{x}\in\Gamma_{D1} \text{ (左边界)},\\
+                        &T(\mathbf{x}) = T_2\;(=0),\quad \mathbf{x}\in\Gamma_{D2} \text{ (右边界)},\\
+                        &\mathbf{q}(\mathbf{x})\cdot\mathbf{n}=0, \quad\quad\quad \mathbf{x}\in\Gamma_{N} \text{
+                        (上下边界)}.
+                        \end{aligned}\tag{3}$$
+                    </div>
+                    <div class="column column-45">
+                        <figure>
+                            <img class="clickable"
+                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_1.jpg?x=257&y=1049&w=446&h=495&r=0"
+                                alt="Porous heat conduction schematic" style="max-height: 45vh;" />
+                            <figcaption>Fig. 1. 物理问题示意图。</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: PINN Architecture & Loss -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>方法论 (1)：PINN 架构与物理损失</h1>
+                <p>采用卷积编码器-解码器网络，将物理定律编码为损失函数，实现无监督训练。</p>
+                <div class="columns">
+                    <div class="column column-55">
+                        <figure>
+                            <img class="clickable"
+                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_2.jpg?x=296&y=151&w=1156&h=574&r=0"
+                                alt="PINN encoder-decoder" style="max-height: 50vh;" />
+                            <figcaption>Fig. 2. 物理约束的卷积编码-解码网络架构。</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column column-45">
+                        <h4>物理损失函数</h4>
+                        $$
+                        \mathcal{L}=\lambda_1\mathcal{L}_{\text{Constitutive}}+\lambda_2\mathcal{L}_{\text{Continuity}}+\lambda_3\mathcal{L}_{\text{BCs}}
+                        $$
+                        <ul>
+                            <li>$\mathcal{L}_{\text{Constitutive}}$: 傅里叶定律残差</li>
+                            <li>$\mathcal{L}_{\text{Continuity}}$: 能量守恒残差</li>
+                            <li>$\mathcal{L}_{\text{BCs}}$: 边界条件残差</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="note">
+                    <strong>核心思想：</strong>网络优化的目标不再是拟合“数据标签”，而是寻找一组能使PDE残差最小化的解（温度场 $\widehat{\mathbf{T}}$ 和热流场
+                    $\widehat{\mathbf{Q}}$）。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Data-driven Baseline -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>方法论 (2)：数据驱动的对照组</h1>
+                <p>为验证 PINN 的性能，构建了一个架构相同但采用传统监督学习方式的神经网络作为基准。</p>
+                <h4>监督损失 (MSE)</h4>
+                $$ \mathcal{L}_{\text{MSE}}=\frac{1}{n}\left(\left\|\mathbf{T}-\widehat{\mathbf{T}}\right\|_2^2
+                + \left\|\mathbf{Q}-\widehat{\mathbf{Q}}\right\|_2^2\right) $$
+                <ul>
+                    <li>需要 FVM/FEM 计算出的"真值"温度场 $\mathbf{T}$ 和热流场 $\mathbf{Q}$ 作为标签。</li>
+                    <li>标签数据的制备成本高昂，是其主要瓶颈。</li>
+                </ul>
+                <figure>
+                    <img class="clickable"
+                        src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_2.jpg?x=296&y=869&w=1155&h=481&r=0"
+                        alt="Supervised counterpart" style="max-height: 55vh;" />
+                    <figcaption>Fig. 3. 数据驱动的对照网络（架构相同，损失不同）。</figcaption>
+                </figure>
+            </div>
+        </div>
+
+        <!-- Slide 8: Dataset -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>方法论 (3)：训练数据集的生成</h1>
+                <p>PINN虽然不需要<strong>标签</strong>，但仍需要多样化的<strong>几何输入</strong>来学习泛化能力。</p>
+                <div class="columns">
+                    <div class="column column-55">
+                        <figure>
+                            <img class="clickable"
+                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_3.jpg?x=101&y=150&w=1153&h=570&r=0"
+                                alt="Dataset coverage" style="max-height: 45vh;" />
+                            <figcaption>Fig. 4. 生成的数据集覆盖了广阔的有效导热系数范围。</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column column-45">
+                        <ul>
+                            <li><strong>生成方法:</strong> 使用 QSGS (Quartet Structure Generation Set)。</li>
+                            <li><strong>数据规模:</strong> 共 <strong>20,254</strong> 个 $128 \times 128$ 像素的结构。</li>
+                            <li><strong>参数范围:</strong> 孔隙率 $V_p$ 覆盖 <strong>5%–60%</strong>，形态多样（含各向异性）。</li>
+                            <li><strong>数据集划分:</strong> 训练集 <strong>16,384</strong> 个，测试集 <strong>512</strong> 个。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Training & Convergence -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>训练过程与收敛性分析</h1>
+                <p>采用 Adam 优化器，学习率阶梯式衰减，训练 300 个 epoch。</p>
+                <div class="columns">
+                    <div class="column">
+                        <h4>物理损失的下降</h4>
+                        <p>训练过程中，本构、连续性和边界条件的损失项均稳定下降并收敛，表明网络输出逐渐满足物理定律。</p>
+                    </div>
+                    <div class="column">
+                        <h4>测试误差的收敛</h4>
+                        <p>在独立的测试集上，与FVM真值对比的相对 $L_2$ 误差也同步下降，证明模型具备良好的泛化能力。</p>
+                    </div>
+                </div>
+                <figure>
+                    <img class="clickable"
+                        src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_4.jpg?x=247&y=151&w=1260&h=495&r=0"
+                        alt="Training curves" style="max-height: 40vh;" />
+                    <figcaption>Fig. 5. (a) 物理损失分量和 (b) 测试集相对 $L_2$ 误差随训练过程的收敛情况。</figcaption>
+                </figure>
+            </div>
+        </div>
+
+        <!-- Slide 10: Results: Field Prediction -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结果 (1)：温度场与热流场预测</h1>
+                <figure>
+                    <img class="clickable"
+                        src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_5.jpg?x=162&y=141&w=1427&h=1234&r=0"
+                        alt="Field comparisons and kappa scatter" />
+                    <figcaption>Fig. 6(a,b). 两个代表性测试样本的预测结果与数值解(FVM)对比。</figcaption>
+                </figure>
+                <div class="note">
+                    <strong>核心发现：</strong>PINN 能够准确预测温度场的整体分布，并成功捕捉到热流集中的主要通道。虽然在相界面处热流预测误差相对较大，但整体物理图像是正确的。
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Results: Quantitative Analysis -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结果 (2)：有效导热系数的定量评估</h1>
+                <p>基于预测的物理场，可计算出材料的宏观有效导热系数 $\kappa_{\text{eff}}$。</p>
+                <div class="columns">
+                    <div class="column column-45">
+                        <figure>
+                            <img class="clickable"
+                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_5.jpg?x=162&y=141&w=1427&h=1234&r=0"
+                                alt="kappa scatter and error" style="max-height: 45vh;" />
+                            <figcaption>Fig. 6(c,d). 512个测试样本的 $\kappa_{\text{eff}}$ 预测值 vs. 真值。</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column column-55">
+                        <table>
+                            <caption>Table 1. 线性导热问题预测误差 (MAPE)</caption>
+                            <thead>
+                                <tr>
+                                    <th>预测物理量</th>
+                                    <th>MAPE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>温度场</td>
+                                    <td>5.40%</td>
+                                </tr>
+                                <tr>
+                                    <td>热流场</td>
+                                    <td>20.6%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>有效热导率 $\kappa_{\text{eff}}$</strong></td>
+                                    <td><strong>2.49%</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>结果表明，尽管热流场的局部误差较高，但积分效应使得宏观属性 $\kappa_{\text{eff}}$ 的预测精度非常高，达到了工程应用要求。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Comparison with Other ML Methods -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结果 (3)：与其他机器学习方法的精度对比</h1>
+                <p>将无标签的 PINN 与其他数据驱动方法进行 $\kappa_{\text{eff}}$ 预测精度对比。</p>
+                <div class="columns">
+                    <div class="column column-45">
+                        <figure>
+                            <img class="clickable"
+                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_6.jpg?x=146&y=148&w=663&h=595&r=0"
+                                alt="MAE comparison with SVR/GPR" />
+                            <figcaption>Fig. 7. MAE 对比：PINN vs. 数据驱动CNN, SVR, GPR。</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column column-55">
+                        <ul>
+                            <li><strong>PINN (无标签):</strong> MAE 2.29%，精度非常高。</li>
+                            <li><strong>Data-driven CNN (有标签):</strong> MAE 0.73%，略胜一筹，但代价是需要昂贵的标签数据。</li>
+                            <li><strong>SVR/GPR (有标签):</strong> MAE > 12%，远低于基于深度学习的方法。</li>
+                        </ul>
+                        <div class="note">
+                            <strong>结论：</strong>PINN 在<strong>无需任何标签数据</strong>的情况下，达到了与全监督深度学习模型相近的精度水平，性价比极高。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Efficiency -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结果 (4)：计算效率的巨大优势</h1>
+                <p>PINN 不仅准确，而且在效率上展现出颠覆性优势。</p>
+                <div class="columns">
+                    <div class="column">
+                        <h3>模型开发时间</h3>
+                        <figure>
+                            <img class="clickable"
+                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_6.jpg?x=189&y=1528&w=1373&h=562&r=0"
+                                alt="Time costs and speedups" style="max-height: 40vh;" />
+                            <figcaption>Fig. 8(a). 总开发时间对比。PINN 省去了耗时最长的“数据集准备”环节。</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <h3>预测（推理）时间</h3>
+                        <figure>
+                            <img class="clickable"
+                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_6.jpg?x=189&y=1528&w=1373&h=562&r=0"
+                                alt="Time costs and speedups" style="max-height: 40vh;" />
+                            <figcaption>Fig. 8(b). 预测 16,384 个样本耗时，PINN 比 FVM <strong>快 5 个数量级</strong>。</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Nonlinear Problem -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>拓展应用：轻松解决非线性问题</h1>
+                <p>PINN 的强大之处在于其灵活性。当物理问题改变时（例如，导热系数依赖于温度 $\kappa(T)=\kappa_0(1+\alpha T)$），只需修改物理损失函数即可。</p>
+                <div class="columns">
+                    <div class="column column-55">
+                        <p><strong>无需重新生成昂贵的标签数据集</strong>，仅需在损失函数中更新 $\kappa$ 的计算方式，即可重新训练模型。</p>
+                        <table>
+                            <caption>Table 2. 非线性问题预测误差 (MAPE)</caption>
+                            <thead>
+                                <tr>
+                                    <th>物理量</th>
+                                    <th>MAPE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>温度场</td>
+                                    <td>4.50%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>有效热导率 $\kappa_{\text{eff}}$</strong></td>
+                                    <td><strong>2.73%</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>非线性问题的预测精度与线性问题相当，同样保持了 <strong>5 个数量级</strong>的加速比。</p>
+                    </div>
+                    <div class="column column-45">
+                        <figure>
+                            <img class="clickable"
+                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_7.jpg?x=127&y=148&w=701&h=579&r=0"
+                                alt="Nonlinear kappa scatter" style="max-height: 45vh;" />
+                            <figcaption>Fig. 9. 非线性导热 $\kappa_{\text{eff}}$ 预测结果，同样高度准确。</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Discussion & Future Work -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>讨论与展望</h1>
+                <h3>超参数与损失权重</h3>
+                <ul>
+                    <li><strong>损失权重是关键:</strong> 文中发现，调高本构关系项的权重 ($\lambda_1=10$) 能显著改善热流预测。这与**自适应加权**思想一致。</li>
+                    <li><strong>数据量的影响:</strong> 增加无标签训练样本数量能持续提升模型性能，这为 PINN 的优化提供了低成本的途径。</li>
+                </ul>
+                <h3>未来工作展望</h3>
+                <ul>
+                    <li><strong>方法改进:</strong> 引入 <strong>RAR/PBRL</strong> 等技术，有望进一步提升对相界面高梯度区域的求解精度。</li>
+                    <li><strong>问题拓展:</strong> 该框架可推广至更复杂的物理问题，如对流-辐射耦合传热、多孔介质中的达西流、材料力学性能预测等。</li>
+                    <li><strong>三维应用:</strong> 发展 3D-CNN 架构的 PINN，解决真实三维多孔结构的传热问题。</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 16: Conclusion -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结论</h1>
+                <div class="columns">
+                    <div class="column">
+                        <h3>本文贡献</h3>
+                        <ul>
+                            <li><strong>方法创新:</strong> 成功应用<strong>无标签</strong> PINN 框架，高效预测了多孔介质的温度/热流场和有效导热系数。</li>
+                            <li><strong>性能卓越:</strong> 实现了与有标签方法相当的<strong>高精度</strong> (MAPE < 3%)，同时获得了比数值模拟快 <strong>
+                                    5 个数量级</strong>的<strong>高效率</strong>。</li>
+                            <li><strong>灵活性强:</strong> 证明了 PINN 能够通过简单修改损失函数轻松拓展到非线性问题，展现了强大的适应性。</li>
+                        </ul>
+                    </div>
+                    <div class="column">
+                        <h3>核心价值</h3>
+                        <p>本文有力地证明了 PINN
+                            作为一种“无数据标注”的深度学习方法，能够在复杂传热问题中实现<strong>精度、效率和灵活性</strong>的统一，为科学计算与工程设计开辟了激动人心的新路径。</p>
+                        <div class="note"><strong>启示：</strong>PINN
+                            打破了传统数据驱动方法对海量标签数据的依赖，为许多难以获取实验或模拟数据的物理问题研究提供了强大的代理建模新范式。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Appendix -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>附录：更多场预测细节</h1>
+                <div class="columns">
+                    <div class="column">
+                        <figure>
+                            <img class="clickable"
+                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_8.jpg?x=289&y=143&w=1180&h=1027&r=0"
+                                alt="B1 accurate case" />
+                            <figcaption>Fig. B1. 预测效果好的样本：等温线与热流矢量。</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <figure>
+                            <img class="clickable"
+                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_9.jpg?x=308&y=143&w=1139&h=992&r=0"
+                                alt="B2 challenging case" />
+                            <figcaption>Fig. B2. 挑战性样本：界面附近误差更显著。</figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Slide 18: Q&A -->
+        <div class="slide">
+            <div class="slide-content title-slide">
+                <h1>感谢聆听</h1>
+                <p class="subtitle" style="margin-top: 3vw;">问答环节 (Q&amp;A)</p>
+            </div>
+        </div>
+
+        <!-- Image Lightbox -->
+        <div id="image-lightbox">
+            <span class="lightbox-close" title="关闭 (Esc)">×</span>
+            <button class="lightbox-toggle" title="切换视图模式"></button>
+            <img src="" alt="全屏视图" id="lightbox-img">
+        </div>
+
+    </div>
+
+    <!-- 控制面板 -->
+    <div id="controls">
+        <button id="prev-btn" title="上一页 (←)">◀</button>
+        <button id="first-btn" title="第一页 (Home)">⏮</button>
+        <span id="slide-counter">1 / 18</span>
+        <button id="last-btn" title="最后一页 (End)">⏭</button>
+        <button id="next-btn" title="下一页 (→)">▶</button>
+        <div id="progress-indicator">
+            <div id="progress-bar"></div>
+        </div>
+        <button id="goto-btn" title="跳转 (G)">🔢</button>
+        <button id="font-dec-btn" title="减小字号">A-</button>
+        <button id="font-inc-btn" title="增大字号">A+</button>
+        <button id="theme-btn" title="切换主题">🎨
+            <div class="theme-menu" id="theme-menu">
+                <div class="theme-option" data-theme="default">专业蓝</div>
+                <div class="theme-option" data-theme="dark">深色</div>
+                <div class="theme-option" data-theme="green">清新绿</div>
+                <div class="theme-option" data-theme="mint">薄荷青</div>
+                <div class="theme-option" data-theme="indigo">靛蓝</div>
+            </div>
+        </button>
+        <button id="fullscreen-btn" title="全屏 (F)">⛶</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 动态日期
+            const dateElement = document.getElementById('current-date');
+            if (dateElement) {
+                const today = new Date();
+                dateElement.textContent = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+            }
+
+            // 元素引用
+            const presentationContainer = document.getElementById('presentation-container');
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            const controls = {
+                prev: document.getElementById('prev-btn'),
+                next: document.getElementById('next-btn'),
+                first: document.getElementById('first-btn'),
+                last: document.getElementById('last-btn'),
+                goto: document.getElementById('goto-btn'),
+                fontDec: document.getElementById('font-dec-btn'),
+                fontInc: document.getElementById('font-inc-btn'),
+                theme: document.getElementById('theme-btn'),
+                themeMenu: document.getElementById('theme-menu'),
+                fullscreen: document.getElementById('fullscreen-btn'),
+                counter: document.getElementById('slide-counter'),
+                progressBar: document.getElementById('progress-bar')
+            };
+
+            let currentSlide = 0;
+            let fontScale = 1.0;
+
+            // 字体缩放
+            function updateFontScale() {
+                presentationContainer.style.setProperty('--font-scale', fontScale);
+            }
+            controls.fontInc.addEventListener('click', () => { fontScale = Math.min(1.5, fontScale + 0.1); updateFontScale(); });
+            controls.fontDec.addEventListener('click', () => { fontScale = Math.max(0.7, fontScale - 0.1); updateFontScale(); });
+
+            // 主题
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('presentation-theme', theme);
+                controls.themeMenu.classList.remove('show');
+            }
+            controls.theme.addEventListener('click', (e) => { e.stopPropagation(); controls.themeMenu.classList.toggle('show'); });
+            document.addEventListener('click', () => controls.themeMenu.classList.remove('show'));
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', (e) => { e.stopPropagation(); setTheme(option.dataset.theme); });
+            });
+
+            // 全屏
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    presentationContainer.requestFullscreen().catch(err => console.error(`Fullscreen error: ${err.message}`));
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            controls.fullscreen.addEventListener('click', toggleFullscreen);
+
+            // 显示幻灯片
+            function showSlide(index) {
+                if (index < 0 || index >= totalSlides) return;
+                slides.forEach((s, i) => s.classList.toggle('active', i === index));
+                currentSlide = index;
+                controls.counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                controls.progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    MathJax.typesetPromise([slides[index]]).catch(err => console.error('MathJax error:', err));
+                }
+            }
+
+            const slideActions = {
+                next: () => showSlide(currentSlide + 1),
+                prev: () => showSlide(currentSlide - 1),
+                first: () => showSlide(0),
+                last: () => showSlide(totalSlides - 1),
+                goto: () => {
+                    const numStr = prompt(`跳转到第几页? (1-${totalSlides})`);
+                    if (numStr) {
+                        const num = parseInt(numStr, 10) - 1;
+                        if (!isNaN(num) && num >= 0 && num < totalSlides) showSlide(num);
+                    }
+                }
+            };
+            controls.next.addEventListener('click', slideActions.next);
+            controls.prev.addEventListener('click', slideActions.prev);
+            controls.first.addEventListener('click', slideActions.first);
+            controls.last.addEventListener('click', slideActions.last);
+            controls.goto.addEventListener('click', slideActions.goto);
+
+            // 图片灯箱
+            const lightbox = document.getElementById('image-lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxClose = lightbox.querySelector('.lightbox-close');
+            const lightboxToggle = lightbox.querySelector('.lightbox-toggle');
+            function openLightbox(src) {
+                lightboxImg.src = src;
+                lightbox.classList.remove('fit-width');
+                lightboxToggle.textContent = '⤢ 适应宽度';
+                lightbox.classList.add('visible');
+            }
+            function closeLightbox() { lightbox.classList.remove('visible'); }
+            document.querySelectorAll('img.clickable').forEach(img => img.addEventListener('click', (e) => { e.stopPropagation(); openLightbox(img.src); }));
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => (e.target === lightbox) && closeLightbox());
+            lightboxToggle.addEventListener('click', () => {
+                const isFitWidth = lightbox.classList.toggle('fit-width');
+                lightboxToggle.textContent = isFitWidth ? '↔ 适应屏幕' : '⤢ 适应宽度';
+            });
+
+            // 键盘快捷键
+            document.addEventListener('keydown', (e) => {
+                if (lightbox.classList.contains('visible')) {
+                    if (e.key === 'Escape') closeLightbox();
+                    return;
+                }
+                switch (e.key) {
+                    case 'ArrowRight':
+                    case ' ':
+                        e.preventDefault(); slideActions.next(); break;
+                    case 'ArrowLeft':
+                        e.preventDefault(); slideActions.prev(); break;
+                    case 'Home':
+                        e.preventDefault(); slideActions.first(); break;
+                    case 'End':
+                        e.preventDefault(); slideActions.last(); break;
+                    case 'f':
+                    case 'F':
+                        e.preventDefault(); toggleFullscreen(); break;
+                    case 'g':
+                    case 'G':
+                        e.preventDefault(); slideActions.goto(); break;
+                    case 'Escape':
+                        if (document.fullscreenElement) document.exitFullscreen(); break;
+                }
+                if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+                    e.preventDefault(); controls.fontInc.click();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+                    e.preventDefault(); controls.fontDec.click();
+                }
+            });
+
+            // 初始化
+            const savedTheme = localStorage.getItem('presentation-theme') || 'default';
+            setTheme(savedTheme);
+            showSlide(0);
+        });
+    </script>
+</body>
+
+</html>
+```

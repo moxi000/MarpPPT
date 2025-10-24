@@ -100,21 +100,36 @@
             --code-color: #0f2f2e;
         }
 
-        /* 靛蓝主题（新增）：沉稳现代，Apple systemIndigo 风格 */
+        /* 深海蓝主题（更新）：灵感来自海洋蓝调 */
         [data-theme="indigo"] {
-            --primary-bg: #f6f7fb;
+            --primary-bg: #f1fbff;
             --secondary-bg: #ffffff;
-            --text-color: #1e2233;
-            --header-color: #5856d6;
-            /* systemIndigo */
-            --accent-color: #6b6aed;
-            --button-bg: #eceefa;
-            --button-hover-bg: #e3e6f8;
-            --border-color: #dfe2f3;
-            --note-bg: #eef0fb;
-            --note-border: #6b6aed;
-            --code-bg: #f3f4fa;
-            --code-color: #1e2233;
+            --text-color: #0b3d5e;
+            --header-color: #008ed9;
+            --accent-color: #0b7dbe;
+            --button-bg: #abe2e2;
+            --button-hover-bg: #96e5f3;
+            --border-color: #40c9e4;
+            --note-bg: #e6f7fc;
+            --note-border: #008ed9;
+            --code-bg: #f0fbff;
+            --code-color: #0b3d5e;
+        }
+
+        /* 玫瑰主题（新增）：柔和高级粉系 */
+        [data-theme="rose"] {
+            --primary-bg: #fff5f8;
+            --secondary-bg: #ffffff;
+            --text-color: #5a1f33;
+            --header-color: #f06292;
+            --accent-color: #ed427b;
+            --button-bg: #f6bccf;
+            --button-hover-bg: #f48fb1;
+            --border-color: #f48fb1;
+            --note-bg: #fbe5ec;
+            --note-border: #ed427b;
+            --code-bg: #fff0f5;
+            --code-color: #5a1f33;
         }
 
         /* ==================== 全局样式 ==================== */
@@ -574,10 +589,48 @@
             border-radius: 4px;
             font-size: 1.4vh;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.6vh;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .theme-option::before {
+            content: "";
+            width: 1.6vh;
+            height: 1.6vh;
+            border-radius: 1vh;
+            background: var(--theme-preview, linear-gradient(90deg, var(--accent-color), var(--header-color)));
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
         }
 
         .theme-option:hover {
             background: var(--button-bg);
+            transform: translateY(-1px);
+        }
+
+        .theme-option[data-theme="default"] {
+            --theme-preview: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .theme-option[data-theme="dark"] {
+            --theme-preview: linear-gradient(135deg, #60a5fa, #1f2937);
+        }
+
+        .theme-option[data-theme="green"] {
+            --theme-preview: linear-gradient(135deg, #2ec866, #34c759);
+        }
+
+        .theme-option[data-theme="mint"] {
+            --theme-preview: linear-gradient(135deg, #00c7be, #20dad0);
+        }
+
+        .theme-option[data-theme="indigo"] {
+            --theme-preview: linear-gradient(135deg, #40c9e4, #008ed9);
+        }
+
+        .theme-option[data-theme="rose"] {
+            --theme-preview: linear-gradient(135deg, #f48fb1, #ed427b);
         }
     </style>
 </head>
@@ -1060,6 +1113,7 @@
                 <div class="theme-option" data-theme="green">清新绿</div>
                 <div class="theme-option" data-theme="mint">薄荷青</div>
                 <div class="theme-option" data-theme="indigo">靛蓝</div>
+                <div class="theme-option" data-theme="rose">玫瑰粉</div>
             </div>
         </button>
         <button id="fullscreen-btn" title="全屏 (F)">⛶</button>

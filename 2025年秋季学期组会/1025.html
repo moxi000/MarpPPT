@@ -623,6 +623,21 @@
                         <p>初步搭建了用于预测多孔介质有效导热系数的神经网络模型。目前模型预测误差较大，平均相对误差在 <strong>10% - 15%</strong> 左右，后续需要从特征工程和网络结构两方面进行优化。</p>
                     </li>
                 </ol>
+                <!-- 两张图片并排显示，对应上面第1、2点 -->
+                <div class="columns" style="margin-top:1vw; align-items:center;">
+                    <div class="column">
+                        <figure>
+                            <img class="clickable" src="images/1025-1.png" alt="AP-Hybrid-PINN 结果示意" style="max-height:40vh;" />
+                            <figcaption>图 1. AP-Hybrid-PINN 论文初稿相关结果（示意）。</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <figure>
+                            <img class="clickable" src="images/1025-2.png" alt="多孔介质神经网络模型结果" style="max-height:40vh;" />
+                            <figcaption>图 2. 多孔介质神经网络模型的初步预测结果（示意）。</figcaption>
+                        </figure>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -770,9 +785,10 @@
             <div class="slide-content">
                 <h1>描述符的物理解释与验证</h1>
                 <p>通过分析极端结构（串联/并联模型）和典型各向异性结构，可以验证描述符的物理意义。</p>
-                <div class="columns">
-                    <div class="column column-40">
-                         <table>
+                <!-- 表格居中，图放在表下并且都居中 -->
+                <div style="display:flex; flex-direction:column; align-items:center; gap:1.5vw; width:100%;">
+                    <div style="width:auto; max-width:90%;">
+                        <table style="width:auto; margin:0 auto;">
                             <caption>Table 1. 串并联结构的描述符值</caption>
                             <thead>
                                 <tr><th>结构</th><th>SF</th><th>BN</th><th>CF</th><th>PN</th><th>DP</th></tr>
@@ -782,12 +798,12 @@
                                 <tr><td>并联 (高 $\kappa_{eff}$)</td><td>$1-\varepsilon$</td><td>$1-\varepsilon$</td><td>大</td><td>0</td><td>1</td></tr>
                             </tbody>
                         </table>
-                        <p>串并联模型作为各向异性的两个极端，其描述符值差异显著，符合物理直觉。</p>
+                        <p style="text-align:center; margin-top:1vw;">串并联模型作为各向异性的两个极端，其描述符值差异显著，符合物理直觉。</p>
                     </div>
-                    <div class="column column-60">
-                        <figure>
-                            <img class="clickable" src="https://cdn.noedgeai.com/bo_d3tp7mn7aajc73auv4ag_5.jpg?x=141&y=157&w=1445&h=427&r=0" alt="Descriptors for Anisotropic Structures" style="max-height: 40vh;"/>
-                            <figcaption>Fig. 6. 描述符能量化不同孔分布(a)和孔形状(b)导致的各向异性。</figcaption>
+                    <div style="width:auto; max-width:90%;">
+                        <figure style="margin:0;">
+                            <img class="clickable" src="https://cdn.noedgeai.com/bo_d3tp7mn7aajc73auv4ag_5.jpg?x=141&y=157&w=1445&h=427&r=0" alt="Descriptors for Anisotropic Structures" style="max-height:40vh; display:block; margin:0 auto;"/>
+                            <figcaption style="text-align:center;">Fig. 6. 描述符能量化不同孔分布(a)和孔形状(b)导致的各向异性。</figcaption>
                         </figure>
                     </div>
                 </div>

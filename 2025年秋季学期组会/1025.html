@@ -817,11 +817,28 @@
         <div class="slide">
             <div class="slide-content">
                 <h1>结果 (1)：描述符与导热系数的相关性</h1>
-                <p>计算了每个描述符与 $\kappa_{eff}$ 之间的相关性，以验证其有效性。</p>
-                 <figure>
-                    <img class="clickable" src="https://cdn.noedgeai.com/bo_d3tp7mn7aajc73auv4ag_4.jpg?x=205&y=621&w=1371&h=1507&r=0" alt="Correlation Plots" style="max-height: 55vh;"/>
-                    <figcaption>Fig. 5. 五个描述符与 $\kappa_{eff}$ 的散点图。</figcaption>
-                </figure>
+                <p>计算了每个描述符与 $\kappa_{eff}$ 的相关性。左侧为散点图，右侧为主要规律与物理解释。</p>
+                <div class="columns" style="align-items:center;">
+                    <div class="column">
+                        <figure>
+                            <img class="clickable" src="https://cdn.noedgeai.com/bo_d3tp7mn7aajc73auv4ag_4.jpg?x=205&y=621&w=1371&h=1507&r=0" alt="Correlation Plots" style="max-height:50vh;" />
+                            <figcaption>Fig. 5. 五个描述符与 $\kappa_{eff}$ 的散点图（a–e）。</figcaption>
+                        </figure>
+                    </div>
+                    <div class="column">
+                        <h3>主要规律与解释</h3>
+                        <ul>
+                            <li><strong>(a) 形状因子 SF：</strong>随 SF 增大，$\kappa_{eff}$ 明显上升，呈<strong>强正相关</strong>。SF 越大代表有效横截面越宽、等效热阻越小。</li>
+                            <li><strong>(b) 瓶颈 BN：</strong>BN 越大，导热越好，呈<strong>强正相关</strong>。BN 描述最窄截面，短板变宽则整体导热受限减弱。</li>
+                            <li><strong>(c) 通道因子 CF：</strong>与 $\kappa_{eff}$ 的相关性<strong>较弱</strong>，散点分散。CF 反映通道弯折/起伏，影响被 SF、BN 等部分吸收。</li>
+                            <li><strong>(d) 垂直非均匀性 PN：</strong>随 PN 增大，$\kappa_{eff}$ 下降，呈<strong>中等强度的负相关</strong>。截面宽度波动越大，等效串联热阻越大。</li>
+                            <li><strong>(e) 主导路径 DP：</strong>与 $\kappa_{eff}$ 呈<strong>最强正相关</strong>。DP 表征最优传热通道的总量，决定了主要热流的承载能力。</li>
+                        </ul>
+                        <div class="note">
+                            综上：<strong>DP ≳ BN ≈ SF</strong> 的正相关最强，<strong>PN</strong> 为显著负相关，<strong>CF</strong> 影响最弱。这与后续的相关系数定量分析相一致。
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         

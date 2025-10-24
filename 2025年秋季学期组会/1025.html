@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <title>组会汇报 - PINN 在多孔介质导热中的应用</title>
+    <title>组会汇报 - 基于物理描述符的多孔介质导热预测</title>
 
     <!-- MathJax 配置 - 支持数学公式 -->
     <script>
@@ -315,6 +315,14 @@
         .column-55 {
             flex: 0 0 55%;
         }
+        
+        .column-60 {
+            flex: 0 0 60%;
+        }
+        
+        .column-40 {
+            flex: 0 0 40%;
+        }
 
         figure {
             margin: 1vw 0;
@@ -369,7 +377,7 @@
         }
 
         table {
-            width: 90%;
+            width: 100%;
             margin: 1.5vw auto;
             border-collapse: collapse;
             font-size: calc(1.3vw * var(--font-scale));
@@ -400,45 +408,20 @@
             transition: background .3s ease;
         }
 
-        /* ==================== MathJax 字体大小终极解决方案 ==================== */
-        /*
-         * By default MathJax renders both display and inline formulae at a
-         * baseline of 1em, which corresponds to the browser's root font size
-         * (usually 16 px).  In this presentation the body text sizes are
-         * expressed in viewport‑relative units (vw) and therefore scale with
-         * the slide dimensions.  As a result the default MathJax rendering
-         * appears noticeably smaller than the surrounding text.  The following
-         * rules make two key adjustments:
-         *   1. Inline equations are set to inherit the surrounding font size
-         *      (1em) so that they match the body text.  No additional
-         *      scaling is applied.
-         *   2. Display equations are dramatically enlarged via a CSS
-         *      transform.  The current configuration scales them to roughly
-         *      three times their original size, making block formulas much
-         *      more prominent.
-         */
-        /* Inline equations: inherit the parent text size (1 em).  We no longer
-           apply any scaling here so that inline math matches the surrounding
-           text exactly. */
+        /* ==================== MathJax 字体大小解决方案 ==================== */
         mjx-container[jax="SVG"] {
-            font-size: 1em;
+            font-size: 1.2em; /* 稍微放大公式，使其更易读 */
         }
 
-        /* Display equations: block layout with substantial scaling.  To enlarge
-           block formulas to roughly three times their normal size we set
-           the font-size to 3em.  Using font-size instead of transform
-           preserves line breaks and overall layout. */
         mjx-container[jax="SVG"][display="true"] {
             display: block;
             margin: 2vw auto 1vw;
-            font-size: 3em;
-            /* Ensure long display equations do not overflow their container.
-               Allow horizontal scrolling if necessary rather than clipping. */
+            font-size: 1.5em; /* 块级公式进一步放大 */
             max-width: 100%;
             overflow-x: auto;
             overflow-y: hidden;
         }
-
+        
         /* ==================== 图片全屏展示 ==================== */
         #image-lightbox {
             position: absolute;
@@ -619,30 +602,25 @@
         <div class="slide active">
             <div class="slide-content title-slide">
                 <h1>工作进展汇报与文献分享</h1>
-                <p class="subtitle">Physics-informed neural networks for studying heat transfer in porous media</p>
+                <p class="subtitle">基于物理描述符的机器学习导热预测</p>
                 <p class="author"><strong>BY2405316 严五金</strong></p>
                 <p class="institution">北京航空航天大学 航空科学与工程学院</p>
                 <p class="date" id="current-date"></p>
             </div>
         </div>
 
-        <!-- Slide 2: Weekly To-Do -->
+        <!-- Slide 2: Weekly Work Summary -->
         <div class="slide">
             <div class="slide-content">
                 <h1>本周工作内容汇报</h1>
                 <ol>
                     <li>
-                        <h3>PINN 进阶理论学习</h3>
-                        <p>系统学习了 PINN 训练中的<strong>自适应权重分配</strong>策略、<strong>Residual-based Adaptive Refinement
-                                (RAR)</strong>
-                            与<strong>Physics-Balanced Residual Learning (PBRL)</strong> 等前沿理论，旨在解决多尺度、高梯度问题中的训练难题。
-                        </p>
+                        <h3>AP-Hybrid-PINN 论文初稿完成</h3>
+                        <p>已完成 AP-Hybrid-PINN 方法的论文初稿撰写。为充分验证算法的准确性，补充了 <strong>5 个二维构造解</strong>的工况进行对比。计划下周再补充一个复杂算例后投稿。</p>
                     </li>
                     <li>
-                        <h3>多孔介质建模与数值实现</h3>
-                        <p>深入研究了多孔介质的结构生成方法（如
-                            <strong>QSGS</strong>）、并学习了使用有限体积法（<strong>FVM</strong>）求解热传导问题与提取有效热导率的流程，为后续 PINN
-                            代理模型的构建准备几何输入和验证基准。</p>
+                        <h3>多孔介质神经网络模型构建</h3>
+                        <p>初步搭建了用于预测多孔介质有效导热系数的神经网络模型。目前模型预测误差较大，平均相对误差在 <strong>10% - 15%</strong> 左右，后续需要从特征工程和网络结构两方面进行优化。</p>
                     </li>
                 </ol>
             </div>
@@ -652,357 +630,262 @@
         <div class="slide">
             <div class="slide-content title-slide">
                 <h2 style="font-size: 2.5vw; color: var(--header-color); border: none;">文献分享</h2>
-                <h1 style="font-size: 3.2vw;">Physics-informed neural networks for studying heat transfer in porous
-                    media</h1>
-                <p class="author text-sm" style="margin-top: 2vw;">Jiaxuan Xu, Han Wei, Hua Bao*</p>
-                <p class="date text-sm">Global Institute of Future Technology &amp; UM-SJTU Joint Institute, Shanghai
-                    Jiao Tong University</p>
-                <p class="date text-sm" style="font-style: italic;">International Journal of Heat and Mass Transfer
-                    <strong>217</strong> (2023) 124671
-                </p>
+                <h1 style="font-size: 2.8vw;">Machine learning prediction of thermal transport in porous media with physics-based descriptors</h1>
+                <p class="author text-sm" style="margin-top: 2vw;">Han Wei, Hua Bao*, Xiulin Ruan*</p>
+                <p class="date text-sm">Shanghai Jiao Tong University & Purdue University</p>
+                <p class="date text-sm" style="font-style: italic;">International Journal of Heat and Mass Transfer 160 (2020) 120176</p>
             </div>
         </div>
 
-        <!-- Slide 4: Background -->
+        <!-- Slide 4: Background & Motivation -->
         <div class="slide">
             <div class="slide-content">
-                <h1>研究背景：数据驱动方法的“痛”</h1>
-                <p>预测多孔介质的传热特性（如有效导热系数、温度/热流场）至关重要。传统方法面临两难：</p>
+                <h1>研究背景：从“黑箱”到“物启”</h1>
+                <p>预测多孔介质的有效导热系数 $\kappa_{eff}$ 时，机器学习方法展现了巨大潜力，但主要面临两种困境：</p>
                 <div class="columns">
                     <div class="column">
-                        <h3>物理模型 & 数值模拟</h3>
+                        <h3>1. 深度学习 (CNN)</h3>
                         <ul>
-                            <li><strong>EMT (解析模型):</strong> 速度快，但精度有限，忽略微观结构。</li>
-                            <li><strong>FVM/FEM (数值模拟):</strong> 精度高，但计算成本巨大，耗时耗力。</li>
+                            <li><strong>方法：</strong>直接将微观结构图像作为输入。</li>
+                            <li><strong>优点：</strong>精度高，能自动提取特征。</li>
+                            <li><strong>缺点：</strong>典型的<strong>“黑箱”模型</strong>，提取的特征图缺乏明确的物理意义，难以提供物理洞见。</li>
                         </ul>
                     </div>
                     <div class="column">
-                        <h3>数据驱动机器学习 (如CNN)</h3>
+                        <h3>2. 传统机器学习 (SVR/GPR)</h3>
                         <ul>
-                            <li><strong>优点:</strong> 兼具高精度和高效率，是优秀的代理模型。</li>
-                            <li><strong>致命弱点:</strong> 严重依赖<strong>海量的、高质量的标注数据</strong>。</li>
+                            <li><strong>方法：</strong>依赖于人工设计的“特征描述符”。</li>
+                            <li><strong>优点：</strong>模型相对简单，如果描述符有物理意义，则可解释性强。</li>
+                            <li><strong>缺点：</strong>性能严重依赖于描述符的质量。</li>
                         </ul>
                     </div>
                 </div>
                 <div class="note">
-                    <strong>核心矛盾：</strong>
-                    获取这些标注数据通常需要进行大量的数值模拟，这本身就是一个“鸡生蛋，蛋生鸡”的悖论。我们能否<strong>摆脱对标注数据的依赖</strong>，直接利用物理知识来训练神经网络？
+                    <strong>本文动机：</strong>能否设计一组具有<strong>清晰物理意义的描述符</strong>，既能准确捕捉影响导热的关键结构特征，又能为传统机器学习模型提供强大动力，从而打开“黑箱”，理解结构与性能的关联？
                 </div>
             </div>
         </div>
 
-        <!-- Slide 5: Physical Problem -->
+        <!-- Slide 5: Methodology - Data Generation -->
         <div class="slide">
             <div class="slide-content">
-                <h1>物理问题与控制方程</h1>
+                <h1>方法论 (1)：数据集的生成与计算</h1>
+                <p>本文首先通过“计算实验”的方式，构建了一个包含结构-属性关系的高质量数据集。</p>
                 <div class="columns">
-                    <div class="column column-55">
-                        <p>研究二维多孔介质（区域 $\Gamma=[0,1]\times[0,1]$）内的稳态热传导问题：</p>
-                        <h4>本构关系 & 能量守恒</h4>
-                        $$-\kappa(T,\mathbf{x})\nabla T(\mathbf{x})=\mathbf{q}(\mathbf{x}),\quad \mathbf{x}\in\Gamma
-                        \tag{1}$$
-                        $$\nabla\cdot\big[\kappa(T,\mathbf{x})\nabla T(\mathbf{x})\big]=0,\quad \mathbf{x}\in\Gamma
-                        \tag{2}$$
-                        <h4>边界条件</h4>
-                        $$\begin{aligned}
-                        &T(\mathbf{x}) = T_1\;(=1),\quad \mathbf{x}\in\Gamma_{D1} \text{ (左边界)},\\
-                        &T(\mathbf{x}) = T_2\;(=0),\quad \mathbf{x}\in\Gamma_{D2} \text{ (右边界)},\\
-                        &\mathbf{q}(\mathbf{x})\cdot\mathbf{n}=0, \quad\quad\quad \mathbf{x}\in\Gamma_{N} \text{
-                        (上下边界)}.
-                        \end{aligned}\tag{3}$$
+                    <div class="column column-60">
+                        <ol>
+                            <li><strong>结构生成 (QSGS):</strong> 使用 Quartet Structure Generation Set 方法，系统性地生成了 <strong>3075</strong> 个具有不同孔隙率、孔尺寸、孔形状和各向异性的二维多孔结构。</li>
+                            <li><strong>属性计算 (FEM):</strong> 对每一个生成的结构，使用高精度的有限元方法 (FEM) 求解热扩散方程，计算其有效导热系数 $\kappa_{eff}$，作为机器学习的“真值”。</li>
+                        </ol>
+                        <p>通过这种方式，获得了“结构图像” $\rightarrow$ “物理描述符” $\rightarrow$ “导热系数”的完整数据链。</p>
                     </div>
-                    <div class="column column-45">
-                        <figure>
-                            <img class="clickable"
-                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_1.jpg?x=257&y=1049&w=446&h=495&r=0"
-                                alt="Porous heat conduction schematic" style="max-height: 45vh;" />
-                            <figcaption>Fig. 1. 物理问题示意图。</figcaption>
+                    <div class="column column-40">
+                         <figure>
+                            <img class="clickable" src="https://cdn.noedgeai.com/bo_d3tp7mn7aajc73auv4ag_1.jpg?x=895&y=154&w=730&h=403&r=0" alt="QSGS Generation" style="max-height: 40vh;" />
+                            <figcaption>Fig. 1. QSGS 结构生成示意图及 FEM 计算设置。</figcaption>
                         </figure>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 6: PINN Architecture & Loss -->
+        <!-- Slide 6: Key Insight - Porosity is Not Enough -->
         <div class="slide">
             <div class="slide-content">
-                <h1>方法论 (1)：PINN 架构与物理损失</h1>
-                <p>采用卷积编码器-解码器网络，将物理定律编码为损失函数，实现无监督训练。</p>
-                <div class="columns">
-                    <div class="column column-55">
-                        <figure>
-                            <img class="clickable"
-                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_2.jpg?x=296&y=151&w=1156&h=574&r=0"
-                                alt="PINN encoder-decoder" style="max-height: 50vh;" />
-                            <figcaption>Fig. 2. 物理约束的卷积编码-解码网络架构。</figcaption>
-                        </figure>
-                    </div>
-                    <div class="column column-45">
-                        <h4>物理损失函数</h4>
-                        $$
-                        \mathcal{L}=\lambda_1\mathcal{L}_{\text{Constitutive}}+\lambda_2\mathcal{L}_{\text{Continuity}}+\lambda_3\mathcal{L}_{\text{BCs}}
-                        $$
-                        <ul>
-                            <li>$\mathcal{L}_{\text{Constitutive}}$: 傅里叶定律残差</li>
-                            <li>$\mathcal{L}_{\text{Continuity}}$: 能量守恒残差</li>
-                            <li>$\mathcal{L}_{\text{BCs}}$: 边界条件残差</li>
-                        </ul>
-                    </div>
-                </div>
+                <h1>关键洞察：孔隙率远非全部</h1>
+                <p>传统模型（如Maxwell, Bruggeman）主要依赖孔隙率 $\varepsilon$ 作为输入，但这远远不够。</p>
+                 <figure>
+                    <img class="clickable" src="https://cdn.noedgeai.com/bo_d3tp7mn7aajc73auv4ag_2.jpg?x=351&y=156&w=1082&h=476&r=0" alt="Conductivity vs Porosity" style="max-height: 50vh;" />
+                    <figcaption>Fig. 2. (a) $\kappa_{eff}$ 随孔隙率的变化。 (b-j) 不同形态结构的 $\kappa_{eff}$ 差异巨大。</figcaption>
+                </figure>
                 <div class="note">
-                    <strong>核心思想：</strong>网络优化的目标不再是拟合“数据标签”，而是寻找一组能使PDE残差最小化的解（温度场 $\widehat{\mathbf{T}}$ 和热流场
-                    $\widehat{\mathbf{Q}}$）。
+                    <strong>核心观察：</strong>在<strong>相同孔隙率</strong>下，由于孔的<strong>形状、分布和连通性</strong>不同，$\kappa_{eff}$ 的值可以相差数倍 (e.g., 对比 Fig.2 e, f, g)。这证明了寻找能够表征这些复杂形态特征的新描述符的必要性。
                 </div>
             </div>
         </div>
-
-        <!-- Slide 7: Data-driven Baseline -->
+        
+        <!-- Slide 7: Descriptors - The Basis -->
         <div class="slide">
             <div class="slide-content">
-                <h1>方法论 (2)：数据驱动的对照组</h1>
-                <p>为验证 PINN 的性能，构建了一个架构相同但采用传统监督学习方式的神经网络作为基准。</p>
-                <h4>监督损失 (MSE)</h4>
-                $$ \mathcal{L}_{\text{MSE}}=\frac{1}{n}\left(\left\|\mathbf{T}-\widehat{\mathbf{T}}\right\|_2^2
-                + \left\|\mathbf{Q}-\widehat{\mathbf{Q}}\right\|_2^2\right) $$
-                <ul>
-                    <li>需要 FVM/FEM 计算出的"真值"温度场 $\mathbf{T}$ 和热流场 $\mathbf{Q}$ 作为标签。</li>
-                    <li>标签数据的制备成本高昂，是其主要瓶颈。</li>
+                <h1>方法论 (2)：物理描述符的基础</h1>
+                <p>所有描述符都源于一个简单的思想：将二维结构信息投影到一维曲线上。</p>
+                 <figure>
+                    <img class="clickable" src="https://cdn.noedgeai.com/bo_d3tp7mn7aajc73auv4ag_2.jpg?x=955&y=1525&w=662&h=526&r=0" alt="Basis of Descriptors" style="max-height: 40vh;"/>
+                    <figcaption>Fig. 3. 描述符的基础：将基体相分别沿 x 和 y 方向累积。</figcaption>
+                </figure>
+                 <ul>
+                    <li><strong>$A_y(x)$：</strong>在位置 $x$ 处，沿 $y$ 方向（垂直于热流方向）的基体截面总长度。它反映了在每个横截面上热量流过的“有效宽度”。</li>
+                    <li><strong>$A_x(y)$：</strong>在位置 $y$ 处，沿 $x$ 方向（平行于热流方向）的基体截面总长度。它反映了在每个纵向路径上基体材料的分布情况。</li>
                 </ul>
-                <figure>
-                    <img class="clickable"
-                        src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_2.jpg?x=296&y=869&w=1155&h=481&r=0"
-                        alt="Supervised counterpart" style="max-height: 55vh;" />
-                    <figcaption>Fig. 3. 数据驱动的对照网络（架构相同，损失不同）。</figcaption>
-                </figure>
             </div>
         </div>
 
-        <!-- Slide 8: Dataset -->
+        <!-- Slide 8: The Five Descriptors (Part 1) -->
         <div class="slide">
             <div class="slide-content">
-                <h1>方法论 (3)：训练数据集的生成</h1>
-                <p>PINN虽然不需要<strong>标签</strong>，但仍需要多样化的<strong>几何输入</strong>来学习泛化能力。</p>
-                <div class="columns">
-                    <div class="column column-55">
-                        <figure>
-                            <img class="clickable"
-                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_3.jpg?x=101&y=150&w=1153&h=570&r=0"
-                                alt="Dataset coverage" style="max-height: 45vh;" />
-                            <figcaption>Fig. 4. 生成的数据集覆盖了广阔的有效导热系数范围。</figcaption>
-                        </figure>
-                    </div>
-                    <div class="column column-45">
-                        <ul>
-                            <li><strong>生成方法:</strong> 使用 QSGS (Quartet Structure Generation Set)。</li>
-                            <li><strong>数据规模:</strong> 共 <strong>20,254</strong> 个 $128 \times 128$ 像素的结构。</li>
-                            <li><strong>参数范围:</strong> 孔隙率 $V_p$ 覆盖 <strong>5%–60%</strong>，形态多样（含各向异性）。</li>
-                            <li><strong>数据集划分:</strong> 训练集 <strong>16,384</strong> 个，测试集 <strong>512</strong> 个。</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 9: Training & Convergence -->
-        <div class="slide">
-            <div class="slide-content">
-                <h1>训练过程与收敛性分析</h1>
-                <p>采用 Adam 优化器，学习率阶梯式衰减，训练 300 个 epoch。</p>
+                <h1>方法论 (3)：五个核心物理描述符 (I)</h1>
                 <div class="columns">
                     <div class="column">
-                        <h4>物理损失的下降</h4>
-                        <p>训练过程中，本构、连续性和边界条件的损失项均稳定下降并收敛，表明网络输出逐渐满足物理定律。</p>
+                        <h3>1. 形状因子 (Shape Factor, SF)</h3>
+                        <p>$$ SF = 1/\int \frac{1}{A_y(x)} dx $$</p>
+                        <p>物理意义：基于准一维热阻近似，量化了整体结构的导热能力。$A_y(x)$ 越大，局部热阻越小，SF 越大。</p>
                     </div>
                     <div class="column">
-                        <h4>测试误差的收敛</h4>
-                        <p>在独立的测试集上，与FVM真值对比的相对 $L_2$ 误差也同步下降，证明模型具备良好的泛化能力。</p>
+                        <h3>2. 瓶颈 (Bottleneck, BN)</h3>
+                        <p>$$ BN = \min(A_y(x)) $$</p>
+                        <p>物理意义：描述了整个导热路径中最窄的位置。它是热流的“短板”，直接限制了整体导热性能。</p>
                     </div>
                 </div>
-                <figure>
-                    <img class="clickable"
-                        src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_4.jpg?x=247&y=151&w=1260&h=495&r=0"
-                        alt="Training curves" style="max-height: 40vh;" />
-                    <figcaption>Fig. 5. (a) 物理损失分量和 (b) 测试集相对 $L_2$ 误差随训练过程的收敛情况。</figcaption>
+                 <figure>
+                    <img class="clickable" src="https://cdn.noedgeai.com/bo_d3tp7mn7aajc73auv4ag_3.jpg?x=280&y=154&w=1158&h=521&r=0" alt="Descriptors Illustration" style="max-height: 40vh;" />
+                    <figcaption>Fig. 4. 五个描述符的图形化示意。</figcaption>
                 </figure>
             </div>
         </div>
 
-        <!-- Slide 10: Results: Field Prediction -->
+        <!-- Slide 9: The Five Descriptors (Part 2) -->
         <div class="slide">
             <div class="slide-content">
-                <h1>结果 (1)：温度场与热流场预测</h1>
-                <figure>
-                    <img class="clickable"
-                        src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_5.jpg?x=162&y=141&w=1427&h=1234&r=0"
-                        alt="Field comparisons and kappa scatter" />
-                    <figcaption>Fig. 6(a,b). 两个代表性测试样本的预测结果与数值解(FVM)对比。</figcaption>
-                </figure>
-                <div class="note">
-                    <strong>核心发现：</strong>PINN 能够准确预测温度场的整体分布，并成功捕捉到热流集中的主要通道。虽然在相界面处热流预测误差相对较大，但整体物理图像是正确的。
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 11: Results: Quantitative Analysis -->
-        <div class="slide">
-            <div class="slide-content">
-                <h1>结果 (2)：有效导热系数的定量评估</h1>
-                <p>基于预测的物理场，可计算出材料的宏观有效导热系数 $\kappa_{\text{eff}}$。</p>
+                <h1>方法论 (3)：五个核心物理描述符 (II)</h1>
                 <div class="columns">
-                    <div class="column column-45">
-                        <figure>
-                            <img class="clickable"
-                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_5.jpg?x=162&y=141&w=1427&h=1234&r=0"
-                                alt="kappa scatter and error" style="max-height: 45vh;" />
-                            <figcaption>Fig. 6(c,d). 512个测试样本的 $\kappa_{\text{eff}}$ 预测值 vs. 真值。</figcaption>
-                        </figure>
+                    <div class="column">
+                        <h3>3. 通道因子 (Channel Factor, CF)</h3>
+                        <p>$$ CF = \text{std}(A_x(y)) $$</p>
+                        <p>物理意义：量化了基体在<strong>平行</strong>于热流方向分布的均匀性。CF 越小，说明导热通道越平直、均匀。</p>
+                        <h3>4. 垂直非均匀性 (Perpendicular Nonuniformity, PN)</h3>
+                        <p>$$ PN = \text{std}(A_y(x)) $$</p>
+                        <p>物理意义：量化了导热截面在<strong>垂直</strong>于热流方向上的波动程度。PN 越大，说明截面宽度变化越剧烈。</p>
                     </div>
-                    <div class="column column-55">
-                        <table>
-                            <caption>Table 1. 线性导热问题预测误差 (MAPE)</caption>
+                    <div class="column">
+                        <h3>5. 主导路径 (Dominant Paths, DP)</h3>
+                        <p>$$ DP = \int_{\lambda} A_x(y) dy $$</p>
+                        <p>物理意义：对 $A_x(y)$ 从大到小排序后，取前 30% ($\lambda=0.3$) 的积分。它代表了结构中“最宽阔、最高效”的导热通道的总量。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Descriptor Validation -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>描述符的物理解释与验证</h1>
+                <p>通过分析极端结构（串联/并联模型）和典型各向异性结构，可以验证描述符的物理意义。</p>
+                <div class="columns">
+                    <div class="column column-40">
+                         <table>
+                            <caption>Table 1. 串并联结构的描述符值</caption>
                             <thead>
-                                <tr>
-                                    <th>预测物理量</th>
-                                    <th>MAPE</th>
-                                </tr>
+                                <tr><th>结构</th><th>SF</th><th>BN</th><th>CF</th><th>PN</th><th>DP</th></tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>温度场</td>
-                                    <td>5.40%</td>
-                                </tr>
-                                <tr>
-                                    <td>热流场</td>
-                                    <td>20.6%</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>有效热导率 $\kappa_{\text{eff}}$</strong></td>
-                                    <td><strong>2.49%</strong></td>
-                                </tr>
+                                <tr><td>串联 (低 $\kappa_{eff}$)</td><td>0</td><td>0</td><td>0</td><td>大</td><td>$1-\varepsilon$</td></tr>
+                                <tr><td>并联 (高 $\kappa_{eff}$)</td><td>$1-\varepsilon$</td><td>$1-\varepsilon$</td><td>大</td><td>0</td><td>1</td></tr>
                             </tbody>
                         </table>
-                        <p>结果表明，尽管热流场的局部误差较高，但积分效应使得宏观属性 $\kappa_{\text{eff}}$ 的预测精度非常高，达到了工程应用要求。</p>
+                        <p>串并联模型作为各向异性的两个极端，其描述符值差异显著，符合物理直觉。</p>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 12: Comparison with Other ML Methods -->
-        <div class="slide">
-            <div class="slide-content">
-                <h1>结果 (3)：与其他机器学习方法的精度对比</h1>
-                <p>将无标签的 PINN 与其他数据驱动方法进行 $\kappa_{\text{eff}}$ 预测精度对比。</p>
-                <div class="columns">
-                    <div class="column column-45">
+                    <div class="column column-60">
                         <figure>
-                            <img class="clickable"
-                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_6.jpg?x=146&y=148&w=663&h=595&r=0"
-                                alt="MAE comparison with SVR/GPR" />
-                            <figcaption>Fig. 7. MAE 对比：PINN vs. 数据驱动CNN, SVR, GPR。</figcaption>
+                            <img class="clickable" src="https://cdn.noedgeai.com/bo_d3tp7mn7aajc73auv4ag_5.jpg?x=141&y=157&w=1445&h=427&r=0" alt="Descriptors for Anisotropic Structures" style="max-height: 40vh;"/>
+                            <figcaption>Fig. 6. 描述符能量化不同孔分布(a)和孔形状(b)导致的各向异性。</figcaption>
                         </figure>
                     </div>
-                    <div class="column column-55">
-                        <ul>
-                            <li><strong>PINN (无标签):</strong> MAE 2.29%，精度非常高。</li>
-                            <li><strong>Data-driven CNN (有标签):</strong> MAE 0.73%，略胜一筹，但代价是需要昂贵的标签数据。</li>
-                            <li><strong>SVR/GPR (有标签):</strong> MAE > 12%，远低于基于深度学习的方法。</li>
-                        </ul>
-                        <div class="note">
-                            <strong>结论：</strong>PINN 在<strong>无需任何标签数据</strong>的情况下，达到了与全监督深度学习模型相近的精度水平，性价比极高。
-                        </div>
-                    </div>
+                </div>
+                 <div class="note">
+                    <strong>结论：</strong>一个结构越像“并联”（导热好），其 SF, BN, DP 值越大，PN 值越小。这五个描述符共同描绘了导热路径的“宽度”、“短板”、“平直度”和“优势通道”，成功地将复杂的二维形态特征映射为几个关键的一维物理量。
                 </div>
             </div>
         </div>
-
-        <!-- Slide 13: Efficiency -->
+        
+        <!-- Slide 11: Results - Correlation Analysis -->
         <div class="slide">
             <div class="slide-content">
-                <h1>结果 (4)：计算效率的巨大优势</h1>
-                <p>PINN 不仅准确，而且在效率上展现出颠覆性优势。</p>
+                <h1>结果 (1)：描述符与导热系数的相关性</h1>
+                <p>计算了每个描述符与 $\kappa_{eff}$ 之间的相关性，以验证其有效性。</p>
+                 <figure>
+                    <img class="clickable" src="https://cdn.noedgeai.com/bo_d3tp7mn7aajc73auv4ag_4.jpg?x=205&y=621&w=1371&h=1507&r=0" alt="Correlation Plots" style="max-height: 55vh;"/>
+                    <figcaption>Fig. 5. 五个描述符与 $\kappa_{eff}$ 的散点图。</figcaption>
+                </figure>
+            </div>
+        </div>
+        
+        <!-- Slide 12: Correlation Coefficients -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结果 (1)：相关性量化分析</h1>
+                <p>使用皮尔逊 ($r$) 和斯皮尔曼 ($\rho$) 相关系数来量化描述符与 $\kappa_{eff}$ 之间的关系。</p>
+                 <table>
+                    <caption>Table 2. 描述符与 $\kappa_{eff}$ 的相关系数</caption>
+                    <thead>
+                        <tr><th>描述符</th><th>SF</th><th>BN</th><th>CF</th><th>PN</th><th>DP</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>皮尔逊系数 $r$ (线性)</td><td>0.934</td><td>0.939</td><td>-0.242</td><td>-0.663</td><td><strong>0.951</strong></td></tr>
+                        <tr><td>斯皮尔曼系数 $\rho$ (单调)</td><td>0.952</td><td>0.940</td><td>-0.338</td><td>-0.688</td><td><strong>0.960</strong></td></tr>
+                    </tbody>
+                </table>
+                <ul>
+                    <li><strong>强正相关:</strong> <strong>DP, SF, BN</strong>。这三者都直接反映了导热通道的有效性，相关性最强。</li>
+                    <li><strong>中等负相关:</strong> <strong>PN</strong>。垂直方向的不均匀性会阻碍热流，导致导热系数下降。</li>
+                    <li><strong>弱负相关:</strong> <strong>CF</strong>。通道因子的影响相对较小，可能因为其效果在其他描述符中已被部分体现。</li>
+                </ul>
+                <div class="note">
+                    <strong>结论：</strong>所有描述符都与导热系数存在预期的物理关联，特别是主导路径(DP)几乎可以作为 $\kappa_{eff}$ 的首要线性指标。
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 13: Results - Machine Learning Prediction -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结果 (2)：机器学习模型预测性能</h1>
+                <p>将这五个物理描述符作为输入，训练支持向量回归 (SVR) 和高斯过程回归 (GPR) 模型。</p>
                 <div class="columns">
                     <div class="column">
-                        <h3>模型开发时间</h3>
                         <figure>
-                            <img class="clickable"
-                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_6.jpg?x=189&y=1528&w=1373&h=562&r=0"
-                                alt="Time costs and speedups" style="max-height: 40vh;" />
-                            <figcaption>Fig. 8(a). 总开发时间对比。PINN 省去了耗时最长的“数据集准备”环节。</figcaption>
+                            <img class="clickable" src="https://cdn.noedgeai.com/bo_d3tp7mn7aajc73auv4ag_6.jpg?x=210&y=490&w=1367&h=541&r=0" alt="ML Prediction Results" style="max-height: 50vh;" />
+                            <figcaption>Fig. 7. (a) 测试集上 SVR/GPR 预测值与 FEM 真值的对比。(b) 相对预测误差分布。</figcaption>
                         </figure>
                     </div>
-                    <div class="column">
-                        <h3>预测（推理）时间</h3>
-                        <figure>
-                            <img class="clickable"
-                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_6.jpg?x=189&y=1528&w=1373&h=562&r=0"
-                                alt="Time costs and speedups" style="max-height: 40vh;" />
-                            <figcaption>Fig. 8(b). 预测 16,384 个样本耗时，PINN 比 FVM <strong>快 5 个数量级</strong>。</figcaption>
-                        </figure>
-                    </div>
+                </div>
+                <p>数据集按 80/20 划分为训练集 (2460) 和测试集 (615)。结果显示，预测值与真值高度吻合，大部分误差在 $\pm 20\%$ 以内。</p>
+            </div>
+        </div>
+        
+        <!-- Slide 14: Quantitative ML Performance -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>结果 (2)：模型性能量化评估</h1>
+                <p>与仅使用孔隙率作为特征的模型进行严格对比。</p>
+                 <table>
+                    <caption>Table 3. SVR/GPR 模型在测试集上的性能指标</caption>
+                    <thead>
+                        <tr><th>特征</th><th>模型</th><th>RMSE (%)</th><th>MAE (%)</th><th>$R^2$</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="2"><strong>五个物理描述符</strong></td>
+                            <td>SVR</td><td>16.02</td><td>12.28</td><td><strong>0.98</strong></td>
+                        </tr>
+                        <tr>
+                            <td>GPR</td><td>17.54</td><td>12.80</td><td><strong>0.97</strong></td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">仅使用孔隙率 $\varepsilon$</td>
+                            <td>SVR</td><td>64.10</td><td>24.15</td><td>0.87</td>
+                        </tr>
+                        <tr>
+                            <td>GPR</td><td>63.31</td><td>26.61</td><td>0.87</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="note">
+                    <strong>核心结论：</strong>引入这五个物理描述符后，模型的预测精度得到了<strong>巨大提升</strong>。MAE 降低了约一半，决定系数 $R^2$ 从 0.87 跃升至 0.98。这无可辩驳地证明了这组描述符的有效性和优越性。
                 </div>
             </div>
         </div>
 
-        <!-- Slide 14: Nonlinear Problem -->
-        <div class="slide">
-            <div class="slide-content">
-                <h1>拓展应用：轻松解决非线性问题</h1>
-                <p>PINN 的强大之处在于其灵活性。当物理问题改变时（例如，导热系数依赖于温度 $\kappa(T)=\kappa_0(1+\alpha T)$），只需修改物理损失函数即可。</p>
-                <div class="columns">
-                    <div class="column column-55">
-                        <p><strong>无需重新生成昂贵的标签数据集</strong>，仅需在损失函数中更新 $\kappa$ 的计算方式，即可重新训练模型。</p>
-                        <table>
-                            <caption>Table 2. 非线性问题预测误差 (MAPE)</caption>
-                            <thead>
-                                <tr>
-                                    <th>物理量</th>
-                                    <th>MAPE</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>温度场</td>
-                                    <td>4.50%</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>有效热导率 $\kappa_{\text{eff}}$</strong></td>
-                                    <td><strong>2.73%</strong></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <p>非线性问题的预测精度与线性问题相当，同样保持了 <strong>5 个数量级</strong>的加速比。</p>
-                    </div>
-                    <div class="column column-45">
-                        <figure>
-                            <img class="clickable"
-                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_7.jpg?x=127&y=148&w=701&h=579&r=0"
-                                alt="Nonlinear kappa scatter" style="max-height: 45vh;" />
-                            <figcaption>Fig. 9. 非线性导热 $\kappa_{\text{eff}}$ 预测结果，同样高度准确。</figcaption>
-                        </figure>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 15: Discussion & Future Work -->
-        <div class="slide">
-            <div class="slide-content">
-                <h1>讨论与展望</h1>
-                <h3>超参数与损失权重</h3>
-                <ul>
-                    <li><strong>损失权重是关键:</strong> 文中发现，调高本构关系项的权重 ($\lambda_1=10$) 能显著改善热流预测。这与**自适应加权**思想一致。</li>
-                    <li><strong>数据量的影响:</strong> 增加无标签训练样本数量能持续提升模型性能，这为 PINN 的优化提供了低成本的途径。</li>
-                </ul>
-                <h3>未来工作展望</h3>
-                <ul>
-                    <li><strong>方法改进:</strong> 引入 <strong>RAR/PBRL</strong> 等技术，有望进一步提升对相界面高梯度区域的求解精度。</li>
-                    <li><strong>问题拓展:</strong> 该框架可推广至更复杂的物理问题，如对流-辐射耦合传热、多孔介质中的达西流、材料力学性能预测等。</li>
-                    <li><strong>三维应用:</strong> 发展 3D-CNN 架构的 PINN，解决真实三维多孔结构的传热问题。</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Slide 16: Conclusion -->
+        <!-- Slide 15: Conclusion -->
         <div class="slide">
             <div class="slide-content">
                 <h1>结论</h1>
@@ -1010,50 +893,23 @@
                     <div class="column">
                         <h3>本文贡献</h3>
                         <ul>
-                            <li><strong>方法创新:</strong> 成功应用<strong>无标签</strong> PINN 框架，高效预测了多孔介质的温度/热流场和有效导热系数。</li>
-                            <li><strong>性能卓越:</strong> 实现了与有标签方法相当的<strong>高精度</strong> (MAPE < 3%)，同时获得了比数值模拟快 <strong>
-                                    5 个数量级</strong>的<strong>高效率</strong>。</li>
-                            <li><strong>灵活性强:</strong> 证明了 PINN 能够通过简单修改损失函数轻松拓展到非线性问题，展现了强大的适应性。</li>
+                            <li><strong>提出了五个物理描述符:</strong> 成功定义了形状因子(SF)、瓶颈(BN)、通道因子(CF)、垂直非均匀性(PN)和主导路径(DP)来量化影响导热的关键形态特征。</li>
+                            <li><strong>揭示了物理关联:</strong> 证明了这些描述符与有效导热系数 $\kappa_{eff}$ 之间存在强烈的物理相关性，为理解微观结构对宏观性能的影响提供了新视角。</li>
+                            <li><strong>提升了模型性能:</strong> 将这些描述符用于 SVR/GPR 模型，预测精度远超仅依赖孔隙率的基准模型 ($R^2=0.98$ vs $0.87$)。</li>
                         </ul>
                     </div>
                     <div class="column">
                         <h3>核心价值</h3>
-                        <p>本文有力地证明了 PINN
-                            作为一种“无数据标注”的深度学习方法，能够在复杂传热问题中实现<strong>精度、效率和灵活性</strong>的统一，为科学计算与工程设计开辟了激动人心的新路径。</p>
-                        <div class="note"><strong>启示：</strong>PINN
-                            打破了传统数据驱动方法对海量标签数据的依赖，为许多难以获取实验或模拟数据的物理问题研究提供了强大的代理建模新范式。</div>
+                        <p>本文成功地在“黑箱”深度学习和过于简化的传统模型之间，找到了一条<strong>“物启” (Physics-informed)</strong> 的中间道路。</p>
+                        <div class="note">
+                             通过设计具有明确物理意义的特征，不仅实现了高精度的预测，更重要的是增强了模型的可解释性，为基于物理理解的材料设计和优化提供了强有力的工具。
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 17: Appendix -->
-        <div class="slide">
-            <div class="slide-content">
-                <h1>附录：更多场预测细节</h1>
-                <div class="columns">
-                    <div class="column">
-                        <figure>
-                            <img class="clickable"
-                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_8.jpg?x=289&y=143&w=1180&h=1027&r=0"
-                                alt="B1 accurate case" />
-                            <figcaption>Fig. B1. 预测效果好的样本：等温线与热流矢量。</figcaption>
-                        </figure>
-                    </div>
-                    <div class="column">
-                        <figure>
-                            <img class="clickable"
-                                src="https://cdn.noedgeai.com/bo_d3p414s601uc738l3t40_9.jpg?x=308&y=143&w=1139&h=992&r=0"
-                                alt="B2 challenging case" />
-                            <figcaption>Fig. B2. 挑战性样本：界面附近误差更显著。</figcaption>
-                        </figure>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Slide 18: Q&A -->
+        <!-- Slide 16: Q&A -->
         <div class="slide">
             <div class="slide-content title-slide">
                 <h1>感谢聆听</h1>
@@ -1074,7 +930,7 @@
     <div id="controls">
         <button id="prev-btn" title="上一页 (←)">◀</button>
         <button id="first-btn" title="第一页 (Home)">⏮</button>
-        <span id="slide-counter">1 / 18</span>
+        <span id="slide-counter">1 / 16</span>
         <button id="last-btn" title="最后一页 (End)">⏭</button>
         <button id="next-btn" title="下一页 (→)">▶</button>
         <div id="progress-indicator">
